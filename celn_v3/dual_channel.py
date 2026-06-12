@@ -55,6 +55,8 @@ from .core import (
     precompute_word_spectra,
     similarity as cosine_similarity,
     projective_resonance as M,
+    inverse_projective_resonance,
+    spectral_entropy,
 )
 from .resonator import unbind_M_reverse, unbind_M_forward
 
@@ -201,6 +203,16 @@ class DualChannelGenerator:
             self._word_spectra = None
             self._word_mags = None
             self._word_phases = None
+
+        # Small Portuguese function-words set used for auto-calibration
+        # Keeps the set compact and internal to avoid external dependencies.
+        self._function_words = set([
+            'o','a','os','as','um','uma','uns','umas',
+            'de','do','da','dos','das','em','no','na','nos','nas',
+            'e','ou','mas','que','se','nem','pois','é','foi','era',
+            'são','está','ser','não','sim','como','quando','onde',
+            'porque','para','com','por','pelo','pela','pelas','sem','sob','sobre',
+        ])
 
     def learn_type_field(self, sentences: list[list[str]]):
         """Learn the type field from corpus transitions.
@@ -742,12 +754,101 @@ class DualChannelGenerator:
 
         return gated
 
+    def _type_sem_pmi_gate_scores(
+        self,
+        type_scores: np.ndarray,
+        sem_scores: np.ndarray,
+        pmi_scores: np.ndarray,
+        excluded: set[int],
+        current_temp: float | None = None,
+        context_strength: float | None = None,
+        generated: list | None = None,
+    ) -> np.ndarray:
+        """Multiplicative gate across Type × Semantic × PMI-RI channels.
+
+        Each channel is normalized independently to [0,1] (excluding banned
+        indices). The product selects words that satisfy ALL three constraints:
+        - Type: syntactic appropriateness
+        - Semantic: contextual/topic coherence (SVD/SDM/MSWE/CRA)
+        - PMI-RI: corpus co-occurrence concentrated content
+
+        If the combined channel confidences are vanishingly small we fall
+        back to the existing Type-Topic gate (if available) or the
+        Type Maestro additive blend to avoid over-filtering.
+        """
+        # Defensive copies
+        t_scores = type_scores.copy()
+        s_scores = sem_scores.copy()
+        p_scores = pmi_scores.copy()
+
+        # Normalize each channel to [0,1]
+        t_norm = self._normalize_score_channel(t_scores, excluded)
+        s_norm = self._normalize_score_channel(s_scores, excluded)
+        p_norm = self._normalize_score_channel(p_scores, excluded)
+
+        # Channel confidences
+        t_conf = self._channel_confidence(t_norm)
+        s_conf = self._channel_confidence(s_norm)
+        p_conf = self._channel_confidence(p_norm)
+        total_conf = t_conf + s_conf + p_conf
+
+        # Fallback when channels provide no signal
+        if total_conf < 1e-12:
+            # Prefer Type-Topic gate if a topic vector was provided externally
+            if hasattr(self, '_last_topic_vec') and self._last_topic_vec is not None:
+                gated = self._type_topic_gate_scores(
+                    type_scores=type_scores,
+                    topic_vec=self._last_topic_vec,
+                    excluded=excluded,
+                )
+                self._last_topic_vec = None
+                return gated
+
+            # Otherwise fallback to the additive Type Maestro blend
+            sem_max = np.abs(sem_scores).max()
+            if sem_max > 1e-12:
+                sem_scores = sem_scores / sem_max
+            return self._type_maestro_blend(
+                type_scores, sem_scores,
+                current_temp if current_temp is not None else 0.8,
+                context_strength=context_strength if context_strength is not None else 0.0,
+                generated=generated,
+            )
+
+        # Multiply normalized channels — product highlights agreement
+        gated = t_norm * s_norm * p_norm
+
+        # Auto-calibration: if gated is too flat, sharpen via exponent
+        valid_mask = np.ones(self.vocab_size, dtype=bool)
+        for idx in excluded:
+            valid_mask[idx] = False
+        valid_gated = gated[valid_mask]
+
+        top_k = max(5, int(len(valid_gated) * 0.02))
+        top_indices = np.argpartition(valid_gated, -top_k)[-top_k:]
+        top_mean = valid_gated[top_indices].mean()
+        all_mean = valid_gated.mean()
+        concentration = top_mean / (all_mean + 1e-12)
+        if concentration < 3.0:
+            gated = gated ** 2.0
+
+        # Re-normalize to [0,1]
+        g_max = gated[valid_mask].max()
+        if g_max > 1e-12:
+            gated = gated / g_max
+
+        for idx in excluded:
+            gated[idx] = -1.0
+
+        return gated
+
     def _type_maestro_blend(
         self,
         type_scores: np.ndarray,
         sem_scores: np.ndarray,
         temperature: float = 0.8,
         context_strength: float = 0.0,
+        generated: list = None,
     ) -> np.ndarray:
         """Type Field as MAESTRO — auto-calibrated by semantic dispersion.
 
@@ -831,7 +932,37 @@ class DualChannelGenerator:
 
         sem_weight = 1.0 - type_weight
 
+        # ── Base type bias to preserve grammatical structure ──
+        # Small constant increase to favour Type field for syntax (articles, prepositions).
+        base_type_bias = 0.20  # raised base from implicit 0.0 to 0.20
+        # Blend type_weight toward 1.0 by base_type_bias fraction
+        type_weight = float(type_weight + base_type_bias * (1.0 - type_weight))
+
+        # ── Auto-calibration using recent functional-word ratio ──
+        # If function-words in last 5 generated steps are below 30%, boost Type further.
+        try:
+            recent = [] if generated is None else list(generated[-5:])
+            if recent:
+                func_count = sum(1 for w in recent if w in self._function_words)
+                func_ratio = func_count / max(len(recent), 1)
+            else:
+                func_ratio = 1.0
+        except Exception:
+            func_ratio = 1.0
+
+        if func_ratio < 0.30:
+            # Scale boost linearly with deficit; max extra boost = 0.5
+            deficit = max(0.0, (0.30 - func_ratio) / 0.30)
+            extra_boost = 0.5 * deficit
+            type_weight = float(type_weight + extra_boost * (1.0 - type_weight))
+
+        # Clip and compute semantic weight (pair-chain/SDM remains content engine but reduced when type is stronger)
+        type_weight = max(0.0, min(1.0, type_weight))
+        sem_weight = 1.0 - type_weight
+
         scores = type_weight * type_scores + sem_weight * sem_scores
+
+        self._last_type_weight = float(type_weight)
 
         return scores
 
@@ -1231,9 +1362,44 @@ class DualChannelGenerator:
             ))
 
             if m_conversation_state is not None:
-                ctx = context_vec if context_vec is not None else self.sem_vecs[current_idx]
-                simulated = M(ctx, recovered, gamma=1.0, bilateral=True)
-                consistency = max(0.0, cosine_similarity(simulated, m_conversation_state))
+                # Simulate adding this follower to the GLOBAL M-state to
+                # obtain the hypothetical next-state for the conversation.
+                try:
+                    simulated = M(m_conversation_state, recovered, gamma=1.0, bilateral=True)
+                except Exception:
+                    simulated = recovered.copy()
+
+                # Measure stability of the resulting state via multiple algebraic
+                # statistics (no cosine similarity): concentration, kurtosis,
+                # energy focus, and spectral entropy (lower entropy = more focused).
+                state = normalize(simulated.astype(np.float32))
+                activations = self.sem_vecs @ state
+                for ex_idx in excluded:
+                    activations[ex_idx] = activations.min()
+
+                p90 = np.percentile(activations, 90)
+                p50 = np.percentile(activations, 50)
+                p10 = np.percentile(activations, 10)
+                scale = abs(p90) + abs(p50) + abs(p10) + 1e-12
+                concentration = (p90 - p10) / scale
+
+                centered = activations - activations.mean()
+                std = centered.std() + 1e-12
+                kurtosis = np.mean((centered / std) ** 4)
+
+                energy = np.mean(activations ** 2)
+                top_energy = np.mean(np.sort(activations)[-min(10, len(activations)): ] ** 2)
+                energy_focus = top_energy / (energy + 1e-12)
+
+                # Spectral entropy: lower is better (more focused frequencies)
+                try:
+                    ent = spectral_entropy(state)
+                    entropy_score = 1.0 / (1.0 + ent)
+                except Exception:
+                    entropy_score = 0.0
+
+                # Combine measures into a consistency score (auto-calibrated later)
+                consistency = max(0.0, float(concentration + 0.5 * kurtosis + 0.8 * energy_focus + 0.5 * entropy_score))
             else:
                 consistency = max(0.0, float(source_scores[pair_idx]))
 
@@ -1312,8 +1478,22 @@ class DualChannelGenerator:
             return filtered
 
         # ── Build query pair: M(context_or_word, current_word) ──
+        # If phase lenses are enabled, deform the current word toward the context
         ctx = context_vec if context_vec is not None else current_word_vec
-        query_pair = M(ctx, current_word_vec, gamma=1.0, bilateral=True)
+        # Use the GLOBAL conversation M-state (m_conversation_state) as the
+        # context for Phase Lens so deformation reflects the whole session.
+        if self.use_phase_lens and m_conversation_state is not None:
+            # Use configured max alpha
+            alpha = getattr(self, 'phase_lens_max_alpha', 0.4)
+            # Deform current word toward the global M-state
+            try:
+                deformed_word = phase_lens(current_word_vec, m_conversation_state, alpha=alpha)
+            except Exception:
+                deformed_word = current_word_vec
+        else:
+            deformed_word = current_word_vec
+
+        query_pair = M(ctx, deformed_word, gamma=1.0, bilateral=True)
 
         # ── Query PairSDM → retrieve blended pair ──
         pair_result = self.pair_sdm.read(query_pair)
@@ -1700,6 +1880,8 @@ class DualChannelGenerator:
                         m_conversation_state=m_conversation_state,
                         excluded=excluded,
                     )
+                    # mark that transport was used this step
+                    self._last_was_transport = True
 
                     # ── M-State Consistency Re-Ranking ──
                     # Replaces diffuse word-to-word similarity with global
@@ -1730,6 +1912,7 @@ class DualChannelGenerator:
                         context_vec=context_vec,
                         excluded=excluded,
                     )
+                    self._last_was_transport = False
                     # Context strength from SDM confidence + phase alignment
                     if context_vec is not None:
                         ctx_alignment = max(0.0, cosine_similarity(
@@ -1756,6 +1939,7 @@ class DualChannelGenerator:
                         context_vec, sem_centroid
                     ))
                     context_strength = raw_strength * ctx_alignment
+                    self._last_was_transport = False
 
                 else:
                     # ── Pure static (no SDM, no phase lens) ──
@@ -1763,40 +1947,82 @@ class DualChannelGenerator:
                     for idx in excluded:
                         sem_scores[idx] = -1.0
                     context_strength = 0.0
+                    self._last_was_transport = False
 
             # ── PMI-RI semantic channel (optional) ──
-            # Complements SVD/transport semantics with co-occurrence-concentrated
-            # scores. It competes only inside the semantic channel; Type Field
-            # remains the grammatical maestro in _type_maestro_blend.
-            if self.pair_source_indices is None or self.pair_follower_indices is None:
-                sem_scores = self._blend_pmi_ri_channel(
-                    sem_scores, recent_indices, excluded
-                )
+            # If PMI-RI vectors are available and PairSDM is NOT providing
+            # a transport path, promote PMI-RI to a first-class channel and
+            # apply the Type × Sem × PMI multiplicative gate. This ensures
+            # that content agreement in the concentrated PMI space filters
+            # candidates that the diffuse SVD channel would otherwise allow.
+            pmi_available = (self.pmi_ri_vecs is not None)
+            pair_fallback = (self.pair_source_indices is None or self.pair_follower_indices is None)
+            if pmi_available and pair_fallback:
+                # Compute PMI-RI scores once
+                pmi_scores = self._pmi_ri_channel_scores(recent_indices, excluded)
+                if pmi_scores is None:
+                    # Fall back to previous behavior
+                    sem_scores = self._blend_pmi_ri_channel(
+                        sem_scores, recent_indices, excluded
+                    )
+                else:
+                    # If we have a last_topic_vec, prefer the original Type-Topic
+                    # gate logic (it uses SDM topic). Otherwise use the 3-way gate.
+                    if hasattr(self, '_last_topic_vec') and self._last_topic_vec is not None:
+                        # Use Type-Topic gate first, then refine by PMI agreement
+                        gated = self._type_topic_gate_scores(
+                            type_scores=type_scores,
+                            topic_vec=self._last_topic_vec,
+                            excluded=excluded,
+                        )
+                        # refine gated by PMI agreement: product with normalized pmi
+                        pmi_norm = self._normalize_score_channel(pmi_scores, excluded)
+                        refined = self._normalize_score_channel(gated, excluded) * pmi_norm
+                        # if refinement has signal, use it, else keep gated
+                        if self._channel_confidence(refined) > 0.0:
+                            sem_scores = refined
+                        else:
+                            sem_scores = gated
+                        self._last_topic_vec = None
+                    else:
+                        # Apply full Type × Sem × PMI gate
+                        sem_scores = sem_scores if sem_scores is not None else np.zeros(self.vocab_size, dtype=np.float32)
+                        sem_scores = self._type_sem_pmi_gate_scores(
+                            type_scores=type_scores,
+                            sem_scores=sem_scores,
+                            pmi_scores=pmi_scores,
+                            excluded=excluded,
+                            current_temp=current_temp,
+                            context_strength=context_strength,
+                            generated=generated,
+                        )
 
             # ── Normalize type scores ──
             type_max = np.abs(type_scores).max()
             if type_max > 1e-12:
                 type_scores = type_scores / type_max
 
-            # ── Type-Topic Gate or Additive Blend ──
-            # Gate: multiplicative filter (type × topic). Only words that
-            # pass BOTH constraints survive. Replaces diffuse additive blend.
-            # Use gate when SDM/PairSDM provides a topic vector.
+            # ── Final gating / blending ──
+            # At this point sem_scores has been processed by PMI/transport logic
+            # and may already encode gating. If a last_topic_vec remains (rare),
+            # apply Type-Topic gate; otherwise, use Type Maestro additive blend
+            # as a graceful fallback.
             if hasattr(self, '_last_topic_vec') and self._last_topic_vec is not None:
                 scores = self._type_topic_gate_scores(
                     type_scores=type_scores,
                     topic_vec=self._last_topic_vec,
                     excluded=excluded,
                 )
-                self._last_topic_vec = None  # reset for next step
+                self._last_topic_vec = None
             else:
-                # Fallback: normalize sem_scores and use additive blend
+                # Ensure sem_scores is normalized for the additive blend
                 sem_max = np.abs(sem_scores).max()
                 if sem_max > 1e-12:
                     sem_scores = sem_scores / sem_max
                 scores = self._type_maestro_blend(
                     type_scores, sem_scores, current_temp,
                     context_strength=context_strength,
+                    generated=generated,
                 )
 
             # ── DYNAMIC TEMPERATURE ──

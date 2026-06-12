@@ -56,26 +56,113 @@ print("\n[2] Training type field...")
 # ═══════════════════════════════════════════════════════════════════════════════
 
 print("\n[3] Encoding word pairs for PairSDM...")
-pair_vectors = []
-for sent in sentences:
-    for i in range(len(sent) - 1):
-        w1, w2 = sent[i], sent[i+1]
-        if w1 in w2i and w2 in w2i:
-            pv = M(sem_vecs[w2i[w1]], sem_vecs[w2i[w2]], gamma=1.0, bilateral=True)
-            pair_vectors.append(pv)
 
-print(f"    {len(pair_vectors)} pairs encoded")
+# Caching: try to load prebuilt PairSDM to avoid expensive recomputation
+import os, hashlib
+cache_dir = '/home/ravizin/celn-v3/.cache'
+os.makedirs(cache_dir, exist_ok=True)
+vector_path = '/home/ravizin/celn-v3/celn_v3_full_vectors.npz'
+vector_stat = os.stat(vector_path)
+vocab_hash = hashlib.sha1('\n'.join(map(str, vocab)).encode('utf-8')).hexdigest()
+cache_key = hashlib.sha1(
+    f"{os.path.abspath(vector_path)}|{vector_stat.st_size}|{int(vector_stat.st_mtime)}|{V}|{D}|{len(sentences)}|{vocab_hash}".encode('utf-8')
+).hexdigest()[:16]
+pair_cache_path = os.path.join(cache_dir, f'pair_sdm_{cache_key}.npz')
 
-pair_sdm = DenseSDM(n_locations=8192, activation_pct=0.005, seed=42)
-n_seed = min(len(pair_vectors), 8000)
-seed_idx = np.random.RandomState(42).choice(len(pair_vectors), n_seed, replace=False)
-seed_vecs = np.array([pair_vectors[i] for i in seed_idx])
-pair_sdm.initialize_addresses(seed_vecs)
+pair_sdm = None
+pair_source_indices = None
+pair_follower_indices = None
 
-print("    Writing to PairSDM...")
-for i, pv in enumerate(pair_vectors):
-    pair_sdm.write(pv)
-print(f"    PairSDM ready: {pair_sdm.stats['n_written']} locations written")
+if os.path.exists(pair_cache_path):
+    try:
+        cache = np.load(pair_cache_path, allow_pickle=True)
+        valid = (
+            int(cache['vocab_size']) == V and
+            int(cache['dim']) == D and
+            int(cache['n_sentences']) == len(sentences) and
+            str(cache['vocab_hash'].item()) == vocab_hash and
+            int(cache['vector_size']) == vector_stat.st_size and
+            int(cache['vector_mtime']) == int(vector_stat.st_mtime)
+        )
+        if valid:
+            pair_source_indices = cache['pair_source_indices'].astype(np.int32)
+            pair_follower_indices = cache['pair_follower_indices'].astype(np.int32)
+            pair_sdm = DenseSDM(n_locations=int(cache['n_locations']), activation_pct=float(cache['activation_pct']), seed=42)
+            pair_sdm.addresses = cache['addresses'].astype(np.float32)
+            pair_sdm.accumulators = cache['accumulators'].astype(np.float32)
+            pair_sdm.counters = cache['counters'].astype(np.int32)
+            pair_sdm.corroboration = cache['corroboration'].astype(np.float32)
+            pair_sdm.total_writes = int(cache['total_writes'])
+            print(f"    Cache hit: {pair_cache_path}")
+            print(f"    {len(pair_source_indices)} pairs loaded")
+        else:
+            print("    Cache invalid: metadata mismatch")
+    except Exception as exc:
+        print(f"    Cache invalid: {exc}")
+        pair_sdm = None
+
+if pair_sdm is None:
+    # Fast-path: build a small sample PairSDM for quick iteration (seconds)
+    sample_cache = os.path.join(cache_dir, 'pair_sdm_sample.npz')
+    if os.path.exists(sample_cache):
+        try:
+            cache = np.load(sample_cache, allow_pickle=True)
+            pair_source_indices = cache['pair_source_indices'].astype(np.int32)
+            pair_follower_indices = cache['pair_follower_indices'].astype(np.int32)
+            pair_sdm = DenseSDM(n_locations=int(cache['n_locations']), activation_pct=float(cache['activation_pct']), seed=42)
+            pair_sdm.addresses = cache['addresses'].astype(np.float32)
+            pair_sdm.accumulators = cache['accumulators'].astype(np.float32)
+            pair_sdm.counters = cache['counters'].astype(np.int32)
+            pair_sdm.corroboration = cache['corroboration'].astype(np.float32)
+            pair_sdm.total_writes = int(cache['total_writes'])
+            print(f"    Sample cache hit: {sample_cache}")
+            print(f"    {len(pair_source_indices)} pairs loaded (sample)")
+        except Exception:
+            pair_sdm = None
+
+    if pair_sdm is None:
+        # Build a lightweight PairSDM from a subset (first 200 sentences)
+        print("    Cache miss: building lightweight PairSDM (sampled) for fast iteration...")
+        sample_sentences = sentences[:200]
+        pair_vectors = []
+        pair_source_indices = []
+        pair_follower_indices = []
+        for sent in sample_sentences:
+            for i in range(len(sent) - 1):
+                w1, w2 = sent[i], sent[i+1]
+                if w1 in w2i and w2 in w2i:
+                    pv = M(sem_vecs[w2i[w1]], sem_vecs[w2i[w2]], gamma=1.0, bilateral=True)
+                    pair_vectors.append(pv)
+                    pair_source_indices.append(w2i[w1])
+                    pair_follower_indices.append(w2i[w2])
+
+        pair_source_indices = np.asarray(pair_source_indices, dtype=np.int32)
+        pair_follower_indices = np.asarray(pair_follower_indices, dtype=np.int32)
+
+        pair_sdm = DenseSDM(n_locations=2048, activation_pct=0.01, seed=42)
+        n_seed = min(len(pair_vectors), 2000)
+        seed_idx = np.random.RandomState(42).choice(len(pair_vectors), n_seed, replace=False)
+        seed_vecs = np.array([pair_vectors[i] for i in seed_idx])
+        pair_sdm.initialize_addresses(seed_vecs)
+        for pv in pair_vectors:
+            pair_sdm.write(pv)
+
+        # Save sample cache for faster future runs
+        np.savez_compressed(
+            sample_cache,
+            n_locations=pair_sdm.n_locations,
+            activation_pct=pair_sdm.activation_pct,
+            total_writes=pair_sdm.total_writes,
+            pair_source_indices=pair_source_indices,
+            pair_follower_indices=pair_follower_indices,
+            addresses=pair_sdm.addresses.astype(np.float32),
+            accumulators=pair_sdm.accumulators.astype(np.float32),
+            counters=pair_sdm.counters.astype(np.int32),
+            corroboration=pair_sdm.corroboration.astype(np.float32),
+        )
+        print(f"    Sample cache saved: {sample_cache}")
+
+print(f"    PairSDM: {pair_sdm.stats['n_written']} locations written")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # 4. CREATE GENERATORS
