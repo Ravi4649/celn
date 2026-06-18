@@ -234,6 +234,79 @@ def precompute_spectra(vectors: np.ndarray) -> np.ndarray:
     return spectra
 
 
+def train_vectors_rp(sentences: list[list[str]],
+                     dim: int = D,
+                     window_size: int = 5,
+                     seed: int = 42,
+                     min_count: int = 2,
+                     verbose: bool = True) -> tuple[np.ndarray, dict, dict, np.ndarray]:
+    """PPMI → Random Projection: non-collapsing 10k-dim word vectors.
+
+    Steps:
+      1. Co-occurrence statistics (same as Hebbian)
+      2. PPMI matrix (same)
+      3. Random projection matrix R (V × D) with entries ±1/√V
+      4. vectors = PPMI @ R  (V × D)
+      5. Normalize each row to unit norm
+
+    Properties:
+      - ZERO collapse: no iterative updates, transformação linear fixa
+      - Preserva similaridades do espaço PPMI (Johnson-Lindenstrauss)
+      - O(V²D) tempo, ~0.5s em CPU para V=2526, D=10000
+      - Sem backprop, gradients, ou thresholds
+    """
+    if verbose:
+        print(f"Building co-occurrence from {len(sentences)} sentences (min_count={min_count})...")
+    
+    # Override build_cooccurrence's internal min_count by building manually
+    word_counts = Counter()
+    for sent in sentences:
+        word_counts.update(sent)
+    min_count = max(2, int(len(sentences) * 0.001)) if min_count is None else min_count
+    vocab_words = [w for w, c in word_counts.items() if c >= min_count]
+    word2idx = {w: i for i, w in enumerate(vocab_words)}
+    idx2word = {i: w for i, w in enumerate(vocab_words)}
+    
+    cooc_counts = Counter()
+    half_window = window_size // 2
+    for sent in sentences:
+        indices = [word2idx[w] for w in sent if w in word2idx]
+        for i, center in enumerate(indices):
+            start = max(0, i - half_window)
+            end = min(len(indices), i + half_window + 1)
+            for j in range(start, end):
+                if i != j:
+                    ctx = indices[j]
+                    cooc_counts[(center, ctx)] += 1
+
+    word_counts_dict = dict(word_counts)
+    cooc_counts_dict = dict(cooc_counts)
+    vocab_size = len(word2idx)
+    if verbose:
+        print(f"  Vocabulary: {vocab_size} words")
+        print(f"  Co-occurrence pairs: {len(cooc_counts)}")
+
+    if verbose:
+        print("Computing PPMI matrix...")
+    ppmi = compute_ppmi(word_counts_dict, cooc_counts_dict, word2idx)
+    nonzero_ratio = np.count_nonzero(ppmi) / ppmi.size
+    if verbose:
+        print(f"  PPMI non-zero: {nonzero_ratio:.2%}")
+
+    if verbose:
+        print(f"Random projection to {dim} dimensions...")
+    rng = np.random.RandomState(seed)
+    scale = 1.0 / np.sqrt(float(vocab_size))
+    R = rng.choice([-scale, scale], size=(vocab_size, dim)).astype(np.float32)
+    vectors = ppmi.astype(np.float32) @ R
+    vectors = batch_normalize(vectors)
+
+    if verbose:
+        print(f"  Vectors: {vectors.shape[0]} words × {vectors.shape[1]} dims")
+
+    return vectors, word2idx, idx2word, ppmi
+
+
 # ---------------------------------------------------------------------------
 # Corpus loading
 # ---------------------------------------------------------------------------

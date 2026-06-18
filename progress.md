@@ -1,0 +1,11 @@
+## Progress
+- Started implementation of a PortAdapter that reads M_pr via non-metric sensors, percentilizes readings, writes them into anonymous VSA ports, and exposes direct unbind-based reading.
+- Added `celn_v3/port_adapter.py` and `experiments/test_port_adapter.py`.
+- First experiment run failed because direct execution from `experiments/` did not include the project root in `sys.path`; fixed script bootstrap.
+- Verification passed: compileall, functional readback, and save/load smoke test.
+- Removed only the generated `.pyc` files for the new PortAdapter experiment; left pre-existing untracked files untouched.
+- Added `celn_v3/gpve_mouth.py` with PCFG rule/register calibration and generation from `M_pr`.
+- Initial smoke test generated real text but conditioning was weak because rule evidence only used direct RHS terminals.
+- Updated GPVE rule evidence to expand each rule through bounded highest-probability PCFG continuations.
+- Added `experiments/run_gpve.py` and ran final GPVE generation; output was grammatical but semantically broad rather than exact to the prompt.
+- Started IntentDistiller implementation phase: integrate Resonator + transport-style canonicalization before PortAdapter while keeping baseline and Phase Lens modes available.
