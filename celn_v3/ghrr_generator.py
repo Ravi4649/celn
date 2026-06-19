@@ -216,11 +216,11 @@ class GHRRGenerator:
         return filtered if len(filtered) >= 5 else candidates
 
     def pairgraph_filter(self, candidates: list[str], last_word: Optional[str],
-                         top_k: int = 200) -> list[str]:
+                         top_k: int = 200, strict: bool = False) -> list[str]:
         if last_word is None or last_word not in self.word2idx:
             return candidates
         src_idx = int(self.word2idx[last_word])
-        followers = self.pair_graph.get_followers(src_idx, top_k=20)
+        followers = self.pair_graph.get_followers(src_idx, top_k=50)
         if not followers:
             return candidates
 
@@ -230,22 +230,33 @@ class GHRRGenerator:
                 follower_words.add(self.idx2word[f_idx])
 
         two_hop = set()
-        for f_idx in followers[:5]:
+        for f_idx in followers[:10]:
             for ff_idx in self.pair_graph.get_followers(f_idx, top_k=5):
                 if ff_idx in self.idx2word:
                     two_hop.add(self.idx2word[ff_idx])
 
+        # Modo estrito: só retorna palavras que são seguidoras canônicas
+        if strict:
+            result = [w for w in candidates if w in follower_words or w in two_hop]
+            if len(result) >= 3:
+                return result
+            # Fallback: retornar seguidores diretos misturados com candidatos
+            direct_followers = [w for w in (list(follower_words) + list(two_hop)) if w in self.word2idx]
+            if direct_followers:
+                return direct_followers[:top_k]
+            return candidates
+
         scored = []
         for w in candidates:
             if w in follower_words:
-                scored.append((w, 2.0))
+                scored.append((w, 3.0))
             elif w in two_hop:
-                scored.append((w, 1.0))
+                scored.append((w, 1.5))
             else:
                 scored.append((w, 0.0))
 
         positive = [w for w, s in scored if s > 0]
-        if len(positive) < max(10, len(candidates) // 5):
+        if len(positive) < max(5, len(candidates) // 10):
             sorted_by_score = sorted(scored, key=lambda x: x[1], reverse=True)
             return [w for w, _ in sorted_by_score[:top_k]]
         return positive[:top_k]
@@ -259,18 +270,20 @@ class GHRRGenerator:
         ghrr_state: np.ndarray,
         candidates: list[str],
         recent_tokens: list[str],
+        context_300d: np.ndarray | None = None,
     ) -> np.ndarray:
-        """4 canais:
+        """5 canais:
           Ch0: GHRR similarity — similaridade direta estado-candidato
           Ch1: GHRR attention — concentração da atenção Q·K^T
           Ch2: Type field — coerência sintática
           Ch3: Trajectory — PairGraph lookahead
+          Ch4: spaCy 300d — similaridade cosseno com contexto recente
         """
         n = len(candidates)
         if n == 0:
-            return np.zeros((0, 4), dtype=np.float32)
+            return np.zeros((0, 5), dtype=np.float32)
 
-        scores = np.zeros((n, 4), dtype=np.float32)
+        scores = np.zeros((n, 5), dtype=np.float32)
 
         # ── Ch0 & Ch1: GHRR scoring ──
         cand_ghrr_list = []
@@ -323,6 +336,15 @@ class GHRRGenerator:
                         except Exception:
                             pass
 
+        # ── Ch4: spaCy 300d cosine similarity ──
+        if context_300d is not None and np.linalg.norm(context_300d) > 1e-12:
+            for i, w in enumerate(candidates):
+                if w in self.cw_to_300d:
+                    cand_spacy = self.spacy_vectors[self.cw_to_300d[w]]
+                    cn = np.linalg.norm(cand_spacy)
+                    if cn > 1e-12:
+                        scores[i, 4] = float(np.dot(cand_spacy / cn, context_300d))
+
         return scores
 
     # ------------------------------------------------------------------
@@ -353,6 +375,7 @@ class GHRRGenerator:
         ghrr_state: np.ndarray,
         recent_tokens: list[str],
         excluded_tokens: set[str] | None = None,
+        frequency_penalty: dict[str, float] | None = None,
         temperature: float = 0.8,
         top_k_search: int = 500,
         top_k_rerank: int = 50,
@@ -360,7 +383,6 @@ class GHRRGenerator:
 
         info = {}
 
-        # 1. Busca em 300d
         ctx_300d = self._make_context_300d(recent_tokens)
         search_candidates = self._brute_force_search(ctx_300d, top_k=top_k_search)
         info['n_search'] = len(search_candidates)
@@ -370,7 +392,6 @@ class GHRRGenerator:
             info['fallback'] = 'search_empty'
             return w, info
 
-        # 1b. Excluir tokens já gerados recentemente da busca
         if excluded_tokens:
             search_candidates = [w for w in search_candidates if w not in excluded_tokens]
             info['n_search'] = len(search_candidates)
@@ -379,53 +400,69 @@ class GHRRGenerator:
                 info['fallback'] = 'all_excluded'
                 return w, info
 
-        # 2. Type Field filter
-        type_filtered = self.type_field_filter(search_candidates, recent_tokens)
-        info['n_type'] = len(type_filtered)
-
-        # 3. PairGraph filter
+        # 2. PairGraph: seguidores canônicos da última palavra
         last_word = recent_tokens[-1] if recent_tokens else None
-        traj_filtered = self.pairgraph_filter(type_filtered, last_word, top_k=100)
-        info['n_traj'] = len(traj_filtered)
+        pg_followers = []
+        if last_word and last_word in self.word2idx:
+            src = int(self.word2idx[last_word])
+            for f in self.pair_graph.get_followers(src, top_k=20):
+                if f in self.idx2word:
+                    pg_followers.append(self.idx2word[f])
+        info['n_pairgraph'] = len(pg_followers)
 
-        # 4. Rerank: interseção com busca mais restrita
-        reranked = self._brute_force_search(ctx_300d, top_k=top_k_rerank)
-        traj_set = set(traj_filtered)
-        reranked = [w for w in reranked if w in traj_set]
-        if len(reranked) < 5:
-            reranked = traj_filtered[:top_k_rerank]
-        info['n_reranked'] = len(reranked)
+        # 3. Estratégia híbrida
+        if pg_followers and len(pg_followers) >= 2:
+            candidates = [w for w in pg_followers if w in set(search_candidates)]
+            if len(candidates) < 3:
+                candidates = pg_followers[:min(len(pg_followers), top_k_rerank)]
+            info['strategy'] = 'pairgraph'
+        else:
+            candidates = search_candidates[:top_k_rerank]
+            info['strategy'] = 'spacy'
 
-        if not reranked:
-            reranked = traj_filtered[:top_k_rerank]
-        if not reranked:
-            reranked = search_candidates[:top_k_rerank]
+        # 4. Type Field filter
+        type_filtered = self.type_field_filter(candidates, recent_tokens)
+        if len(type_filtered) >= 3:
+            candidates = type_filtered
+        info['n_final'] = len(candidates)
 
-        # 5. GHRR channel scoring
-        channel_scores = self.compute_channel_scores(ghrr_state, reranked, recent_tokens)
+        # 5. Channel scoring
+        channel_scores = self.compute_channel_scores(
+            ghrr_state, candidates, recent_tokens, context_300d=ctx_300d
+        )
         combined = self.competitive_gate(channel_scores)
 
-        # 6. Temperature sampling
+        # Frequency penalty
+        if frequency_penalty:
+            for i, w in enumerate(candidates):
+                if w in frequency_penalty:
+                    combined[i] *= np.exp(-frequency_penalty[w] * 4.0)
+
+        # PairGraph bonus 50%
+        pg_set = set(pg_followers) if pg_followers else set()
+        for i, w in enumerate(candidates):
+            if w in pg_set:
+                combined[i] *= 1.5
+
+        # Temperature sampling
         if temperature > 0 and len(combined) > 1:
-            scale = float(np.std(combined)) if np.std(combined) > 1e-12 else 1.0
-            centered = combined - np.max(combined)
-            logits = centered / (scale * temperature)
-            logits = np.clip(logits, -20, 20)
+            s = float(np.std(combined)) if np.std(combined) > 1e-12 else 1.0
+            c = combined - np.max(combined)
+            logits = np.clip(c / (s * temperature), -20, 20)
             probs = np.exp(logits)
-            prob_sum = probs.sum()
-            if prob_sum > 1e-12:
-                probs /= prob_sum
+            ps = probs.sum()
+            if ps > 1e-12:
+                probs /= ps
             else:
                 probs = np.ones_like(probs) / len(probs)
             chosen_idx = int(np.random.choice(len(combined), p=probs))
         else:
             chosen_idx = int(np.argmax(combined))
 
-        chosen_word = reranked[chosen_idx]
+        chosen_word = candidates[chosen_idx]
         info['chosen_word'] = chosen_word
         info['combined_score'] = float(combined[chosen_idx])
         info['channel_scores'] = channel_scores[chosen_idx].tolist()
-
         return chosen_word, info
 
     def generate(
@@ -462,7 +499,10 @@ class GHRRGenerator:
 
         generated = []
         recent = tokens[-3:]
-        excluded = set(tokens)  # não repetir palavras do prompt
+        excluded = set(tokens)
+        freq_penalty: dict[str, float] = {}
+        for t in tokens:
+            freq_penalty[t] = 3.0  # prompt tokens: fortemente penalizados
         all_info = []
 
         for step in range(max_tokens):
@@ -470,22 +510,30 @@ class GHRRGenerator:
                 ghrr_state=ghrr_state,
                 recent_tokens=recent,
                 excluded_tokens=excluded if len(excluded) > 0 else None,
+                frequency_penalty=freq_penalty,
                 temperature=temperature,
             )
             info['step'] = step
             all_info.append(info)
 
             if verbose:
-                ch = info.get('channel_scores', [0, 0, 0, 0])
+                ch = info.get('channel_scores', [0, 0, 0, 0, 0])
                 print(f"  [{step+1}] {word} "
-                      f"(sim={ch[0]:.3f} attn={ch[1]:.3f} type={ch[2]:.3f} traj={ch[3]:.3f} | "
-                      f"combined={info['combined_score']:.4f})")
+                      f"(sim={ch[0]:.3f} attn={ch[1]:.3f} type={ch[2]:.3f} traj={ch[3]:.3f} "
+                      f"sp={ch[4]:.3f} | combined={info['combined_score']:.4f})")
 
             generated.append(word)
             recent = (recent + [word])[-3:]
 
-            # Janela de exclusão: últimas N palavras não podem ser repetidas
-            excluded = set(generated[-(exclude_window):]) if exclude_window > 0 else set()
+            excluded = set(generated[-(exclude_window):])
+
+            if word not in freq_penalty:
+                freq_penalty[word] = 0.0
+            freq_penalty[word] += 1.0
+            for w in list(freq_penalty.keys()):
+                freq_penalty[w] *= 0.92
+                if freq_penalty[w] < 0.05:
+                    del freq_penalty[w]
 
             # EMA update: estado = (1-alpha)*estado + alpha*palavra
             word_ghrr = self._get_ghrr(word)
