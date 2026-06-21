@@ -19,6 +19,7 @@ Princípios:
 """
 
 import numpy as np
+from numba import njit
 
 # ---------------------------------------------------------------------------
 # Configuração
@@ -85,21 +86,17 @@ def normalize_vector_batch(h_batch: np.ndarray) -> np.ndarray:
 # Binding GHRR (multiplicação de matrizes bloco-a-bloco)
 # ---------------------------------------------------------------------------
 
+@njit(cache=True)
+def _ghrr_bind_jit(h1: np.ndarray, h2: np.ndarray) -> np.ndarray:
+    D = h1.shape[0]
+    result = np.zeros_like(h1)
+    for j in range(D):
+        result[j] = h1[j] @ h2[j]
+    return result
+
+
 def ghrr_bind(h1: np.ndarray, h2: np.ndarray) -> np.ndarray:
-    """Binding GHRR: multiplicação de matrizes elemento-a-fatia.
-    
-    [H1 * H2]_j = H1_j @ H2_j  (matriz M×M × M×M)
-    
-    NÃO-COMUTATIVO: ghrr_bind(h1, h2) ≠ ghrr_bind(h2, h1) para M>1.
-    O(D * M^3) — rápido em CPU (M pequeno).
-    
-    Args:
-        h1, h2: (D, M, M) float32
-    
-    Returns:
-        (D, M, M) float32
-    """
-    return np.matmul(h1.astype(DTYPE), h2.astype(DTYPE))
+    return _ghrr_bind_jit(h1.astype(DTYPE), h2.astype(DTYPE))
 
 
 def ghrr_bind_normalized(h1: np.ndarray, h2: np.ndarray) -> np.ndarray:

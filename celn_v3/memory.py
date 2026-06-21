@@ -20,6 +20,7 @@ Mathematical core:
 
 import numpy as np
 from typing import Optional, Tuple
+from numba import njit
 
 from .core import normalize, similarity, auto_threshold
 
@@ -63,6 +64,23 @@ def sentence_to_centroid(
 # ---------------------------------------------------------------------------
 # Dense SDM
 # ---------------------------------------------------------------------------
+
+@njit(cache=True)
+def _activation_mask_numba(
+    sims: np.ndarray, activation_pct: float, n_locations: int
+) -> tuple[np.ndarray, float, int]:
+    k = max(1, int(n_locations * activation_pct))
+    perc = 100.0 * (1.0 - activation_pct)
+    threshold = np.percentile(sims, perc)
+    mask = sims >= threshold
+    n_activated = int(mask.sum())
+    if n_activated == 0:
+        top_idx = np.argmax(sims)
+        mask = np.zeros(n_locations, dtype=np.bool_)
+        mask[top_idx] = True
+        n_activated = 1
+    return mask, float(threshold), n_activated
+
 
 class DenseSDM:
     """Sparse Distributed Memory for dense real-valued vectors.
@@ -181,32 +199,12 @@ class DenseSDM:
     # ------------------------------------------------------------------
 
     def _compute_activation_mask(self, vec: np.ndarray) -> np.ndarray:
-        """Compute the activation mask for a vector.
-
-        Returns a boolean array of shape (n_locations,) where True marks
-        locations whose cosine similarity to `vec` exceeds the
-        self-calibrating percentile threshold.
-        """
-        # Cosine similarity = dot product (both addresses and vec are normalized)
         sims = self.addresses @ vec.astype(np.float32)
-
-        # Self-calibrating threshold: top (activation_pct) fraction
-        k = max(1, int(self.n_locations * self.activation_pct))
-        perc = 100.0 * (1.0 - self.activation_pct)
-        threshold = float(np.percentile(sims, perc))
-
+        mask, threshold, n_activated = _activation_mask_numba(
+            sims, self.activation_pct, self.n_locations
+        )
         self._last_threshold = threshold
-        mask = sims >= threshold
-        self._last_n_activated = int(mask.sum())
-
-        # FIX: if mask is empty (can happen with very small activation_pct
-        # or adversarial input), fall back to top-1
-        if self._last_n_activated == 0:
-            top_idx = int(np.argmax(sims))
-            mask = np.zeros(self.n_locations, dtype=bool)
-            mask[top_idx] = True
-            self._last_n_activated = 1
-
+        self._last_n_activated = n_activated
         return mask
 
     def write(self, vector: np.ndarray) -> int:

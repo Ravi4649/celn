@@ -22,6 +22,7 @@ Reference:
 import numpy as np
 from numpy.fft import fft, ifft
 from typing import Optional, Tuple
+from numba import njit
 
 from .core import D, normalize, similarity
 
@@ -180,6 +181,19 @@ def unbind_M_reverse(
 # Resonator Decoder
 # ---------------------------------------------------------------------------
 
+@njit(cache=True)
+def _nearest_idx_numba(codebook: np.ndarray, vec_norm: np.ndarray) -> int:
+    sims = codebook @ vec_norm
+    return int(np.argmax(sims))
+
+
+@njit(cache=True)
+def _nearest_score_numba(codebook: np.ndarray, vec_norm: np.ndarray) -> tuple[int, float]:
+    sims = codebook @ vec_norm
+    idx = int(np.argmax(sims))
+    return idx, float(sims[idx])
+
+
 class ResonatorDecoder:
     """Factorize composite vectors into constituent codebook elements.
 
@@ -225,27 +239,15 @@ class ResonatorDecoder:
     # ------------------------------------------------------------------
 
     def _nearest(self, vec: np.ndarray, top_k: int = 1) -> np.ndarray:
-        """Find indices of nearest codebook vectors by cosine similarity.
-
-        Args:
-            vec: Query vector, shape (D,). Need not be normalized.
-            top_k: Number of nearest neighbors to return.
-
-        Returns:
-            Array of indices, shape (top_k,), sorted by similarity (descending).
-        """
         vec_norm = normalize(vec)
-        sims = self.codebook @ vec_norm.astype(np.float32)
         if top_k == 1:
-            return np.array([int(np.argmax(sims))])
+            return np.array([_nearest_idx_numba(self.codebook, vec_norm)])
+        sims = self.codebook @ vec_norm.astype(np.float32)
         return np.argsort(sims)[-top_k:][::-1]
 
     def _nearest_with_score(self, vec: np.ndarray) -> Tuple[int, float]:
-        """Find nearest codebook vector and its similarity score."""
         vec_norm = normalize(vec)
-        sims = self.codebook @ vec_norm.astype(np.float32)
-        idx = int(np.argmax(sims))
-        return idx, float(sims[idx])
+        return _nearest_score_numba(self.codebook, vec_norm)
 
     def _compute_unbound(
         self,

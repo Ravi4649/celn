@@ -20,6 +20,7 @@ Key properties:
 
 import numpy as np
 from numpy.fft import fft, ifft
+from numba import njit
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -133,71 +134,39 @@ def phi(y: np.ndarray, gamma: float = 1.0) -> np.ndarray:
 # M(x, y): Projective Resonance — the unified operation
 # ---------------------------------------------------------------------------
 
-def projective_resonance(x: np.ndarray, y: np.ndarray,
-                         gamma: float = 1.0,
-                         bilateral: bool = False,
-                         normalize_output: bool = True) -> np.ndarray:
-    """M(x, y) = FFT⁻¹( FFT(x) ⊙ FFT_amplified(y, x) )
-
-    The single unifying operation that simultaneously:
-      1. BINDS x and y (composition via circular convolution)
-      2. ATTENDS to dominant frequencies (via φ amplification)
-      3. PRESERVES order (non-commutative: M(x,y) ≠ M(y,x))
-
-    Two modes:
-      UNILATERAL (bilateral=False): amplifies dominant freqs in y
-        M(x,y) = FFT⁻¹( x̂ ⊙ ŷ ⊙ weight(|ŷ|) )
-        Non-commutativity: weak for similar words, strong for dissimilar
-
-      BILATERAL (bilateral=True): amplifies freqs where y has MORE
-        energy than x (novel information from y)
-        M(x,y) = FFT⁻¹( x̂ ⊙ ŷ ⊙ weight(|ŷ|/|x̂|) )
-        Non-commutativity: STRONG — y adds different info to x than vice versa
-
-    Args:
-        x: First vector (context / state)
-        y: Second vector (new word being composed)
-        gamma: Amplification exponent
-        bilateral: If True, use bilateral (differential) φ weighing
-        normalize_output: If True, L2-normalize the result
-
-    Returns:
-        Result vector representing x composed with amplified-y
-    """
-    X = fft(x)
-    Y = fft(y)
-    mag_x = np.abs(X)
-    mag_y = np.abs(Y)
-
+@njit(cache=True)
+def _proj_spectrum(X: np.ndarray, Y: np.ndarray,
+                   gamma: float, bilateral: bool,
+                   mag_x: np.ndarray, mag_y: np.ndarray) -> np.ndarray:
+    """Inner spectral compute for projective_resonance (nopython-safe)."""
     if bilateral:
-        # BILATERAL: amplify frequencies where y adds NEW information
-        # weight_k = (|ŷ_k| / (|x̂_k| + ε))^γ
-        # High weight: y has strong energy where x has weak energy
-        # Low weight: x already has strong energy there
         ratio = mag_y / (mag_x + 1e-12)
         median_ratio = np.median(ratio)
         if median_ratio > 1e-12:
             rel_weight = ratio / median_ratio
-            weight_mag = np.tanh(rel_weight ** gamma)
+            weight_mag = np.tanh(rel_weight ** gamma).astype(np.complex128)
         else:
-            weight_mag = np.ones_like(mag_y)
+            weight_mag = np.ones_like(mag_y, dtype=np.complex128)
     else:
-        # UNILATERAL: amplify dominant frequencies in y
         median_mag = np.median(mag_y)
         if median_mag > 1e-12:
             rel_mag = mag_y / median_mag
-            weight_mag = np.tanh(rel_mag ** gamma)
+            weight_mag = np.tanh(rel_mag ** gamma).astype(np.complex128)
         else:
-            weight_mag = np.ones_like(mag_y)
+            weight_mag = np.ones_like(mag_y, dtype=np.complex128)
+    return X * Y * weight_mag
 
-    # Unified bind + attend in ONE spectral product:
-    result_spectrum = X * Y * weight_mag
 
+def projective_resonance(x: np.ndarray, y: np.ndarray,
+                         gamma: float = 1.0,
+                         bilateral: bool = False,
+                         normalize_output: bool = True) -> np.ndarray:
+    X = fft(x)
+    Y = fft(y)
+    result_spectrum = _proj_spectrum(X, Y, gamma, bilateral, np.abs(X), np.abs(Y))
     result = ifft(result_spectrum).real
-
     if normalize_output:
         result = normalize(result)
-
     return result
 
 
