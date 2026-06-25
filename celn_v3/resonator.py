@@ -183,13 +183,13 @@ def unbind_M_reverse(
 
 @njit(cache=True)
 def _nearest_idx_numba(codebook: np.ndarray, vec_norm: np.ndarray) -> int:
-    sims = codebook @ vec_norm
+    sims = codebook @ vec_norm.astype(codebook.dtype)
     return int(np.argmax(sims))
 
 
 @njit(cache=True)
 def _nearest_score_numba(codebook: np.ndarray, vec_norm: np.ndarray) -> tuple[int, float]:
-    sims = codebook @ vec_norm
+    sims = codebook @ vec_norm.astype(codebook.dtype)
     idx = int(np.argmax(sims))
     return idx, float(sims[idx])
 

@@ -1,0 +1,16 @@
+# ── CELN v3 Core Dependencies ──────────────────────────────────
+# Required for the reasoning engine and text generation pipeline.
+
+numpy>=1.21.0             # Core vector operations, FFT binding
+numba>=0.56.0             # JIT-compiled inner loops (@njit)
+
+# ── Optional: Natural language parsing (closed-loop verification) ──
+# Install one of the Portuguese spaCy models:
+#   python -m spacy download pt_core_news_lg   (~500 MB, high accuracy)
+#   python -m spacy download pt_core_news_sm   (~13 MB, light)
+spacy>=3.5.0
+
+# ── Optional: Benchmarks & experiments ─────────────────────────
+# skikit-learn          # PCA / SVD baselines (experiments only)
+# psutil                # Memory profiling (stress tests only)
+# Cython                # Reservoir computing (experimental celn_rc)

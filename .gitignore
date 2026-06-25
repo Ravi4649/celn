@@ -1,1 +1,113 @@
+# ── Python bytecode & runtime caches ──
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.nbc
+*.nbi
+*.nbi.len
+
+# ── Numba JIT cache (compiled per Python version) ──
+*.py314.nbc
+*.py314.nbi
+
+# ── Virtual environments ──
+litellm-env/
+venv/
+.venv/
+env/
+.env/
+virtualenv/
+
+# ── Build artifacts ──
+build/
+dist/
+*.egg-info/
+*.egg/
+celn_rc/*.so
+celn_rc/*.pyd
+celn_rc/esn_core.c
+develop-eggs/
+lib/
+lib64/
+
+# ── Package distribution ──
+*.whl
+*.tar.gz
+MANIFEST
+
+# ── Config files with secrets (keep template only) ──
+litellm_config.yaml
+.env
+*.env.local
+
+# ── IDE & editor files ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.pyc.bak
+
+# ── Binary data files (too large for git) ──
+*.npz
+*.npy
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.hdf
+# But allow small example data if needed:
+!example_*.npz
+
+# ── Model files (downloaded separately) ──
+*.bin
+*.pt
+*.pth
+*.onnx
+*.pb
+*.sav
+
+# ── Jupyter Notebook checkpoints ──
+.ipynb_checkpoints/
+
+# ── Logs & temp files ──
+*.log
+*.tmp
+/tmp/opencode/
+
+# ── Test & coverage ──
+.pytest_cache/
+.cache/
+coverage/
+.coverage
+htmlcov/
+.xml
+.pytest_cache/
+
+# ── OS files ──
+.DS_Store
+Thumbs.db
+*.~
+*.swp
+*.swo
+
+# ── Planning / project notes (dev artifacts) ──
+.planning/
+
+# ── LaTeX build artifacts ──
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+ablation_results.tex
+
+# ── Cython generated C files ──
+*.c
+*.h
