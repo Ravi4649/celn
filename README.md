@@ -13,12 +13,15 @@ CELN scores **100% on ProofWriter** (500/500) and **100% on PrOntoQA** (100/100)
 
 ```bash
 pip install -r requirements.txt
-python examples/step_by_step.py
+python examples/step_by_step_en.py
 ```
 
-The demo creates rules in Portuguese (e.g., "every dog is an animal", "Rex is a dog"), encodes them as 10k-dimensional vectors, stores them in associative memory, then walks through each deduction step with vector snapshots. No GPU, no model download — it generates random word vectors if pre-trained ones aren't available.
+That's it. No downloads, no GPU, no model files. The demo encodes English rules ("Rex is a dog", "every dog is a mammal") into 10k-dimensional vectors using deterministic hash-based word vectors, stores them in associative memory, then walks through each deduction step with vector snapshots.
 
 ```bash
+# Portuguese version (uses random vectors if pre-trained aren't available)
+python examples/step_by_step.py
+
 # Full benchmark: 500 ProofWriter examples (~5 minutes)
 python experiments/benchmark_proofwriter_real.py
 ```

@@ -110,4 +110,4 @@ ablation_results.tex
 
 # ── Cython generated C files ──
 *.c
-*.harchive/
+archive/
