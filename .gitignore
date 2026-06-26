@@ -62,6 +62,9 @@ Thumbs.db
 # But allow small example data if needed:
 !example_*.npz
 
+# ── Large JSON assets (download separately) ──
+data/pcfg_*.json
+
 # ── Model files (downloaded separately) ──
 *.bin
 *.pt
