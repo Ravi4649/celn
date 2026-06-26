@@ -18,7 +18,6 @@ git clone https://github.com/Ravi4649/celn.git
 cd celn
 pip install -r requirements.txt
 python examples/step_by_step_en.py
-```
 
 No downloads, no GPU, no model files. The demo encodes English rules ("Rex is a dog", "every dog is a mammal") into 10k-dimensional vectors using deterministic hash-based word vectors, then walks through each deduction step.
 
@@ -43,7 +42,7 @@ CELN treats reasoning as reversible linear algebra.
 
 ---
 
-## Results
+Results
 
 Tested on an AMD Ryzen 2600 (CPU) with 16 GB RAM. No GPU used.
 
@@ -133,7 +132,7 @@ corpus → train.py (PPMI + Hebbian) → word vectors (10k-D)
 
 ---
 
-## Cite
+Cite
 
 ```bibtex
 @article{venturini2026celn,
@@ -146,7 +145,7 @@ doi={10.5281/zenodo.20836283}
 
 ---
 
-## License
+License
 
 CC BY-NC-SA 4.0 — Attribution-NonCommercial-ShareAlike 4.0 International.
 
