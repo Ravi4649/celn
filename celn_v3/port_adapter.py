@@ -26,8 +26,7 @@ from pathlib import Path
 from typing import Callable, Iterable
 
 import hashlib
-import os
-from multiprocessing import Pool, cpu_count
+from multiprocessing import cpu_count
 
 import numpy as np
 

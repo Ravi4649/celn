@@ -21,6 +21,8 @@ Princípios:
 import numpy as np
 from numba import njit
 
+from .core import auto_threshold, competitive_filter
+
 # ---------------------------------------------------------------------------
 # Configuração
 # ---------------------------------------------------------------------------
@@ -263,21 +265,8 @@ def ghrr_encode_sequence(words_ghrr: list[np.ndarray]) -> np.ndarray:
 
 
 # ---------------------------------------------------------------------------
-# Auto-calibração (mesmo princípio do core original)
+# Auto-calibração (re-exportado de core.py)
 # ---------------------------------------------------------------------------
-
-def auto_threshold(values: np.ndarray, percentile: float = 90.0) -> float:
-    """Threshold auto-calibrável baseado no percentil da distribuição."""
-    return float(np.percentile(values, percentile))
-
-
-def competitive_filter(scores: np.ndarray, percentile: float = 90.0) -> np.ndarray:
-    """Zera scores abaixo do threshold competitivo auto-calibrável."""
-    threshold = auto_threshold(scores, percentile)
-    filtered = scores.copy()
-    filtered[filtered < threshold] = 0.0
-    return filtered
-
 
 # ---------------------------------------------------------------------------
 # Inicialização de vetores GHRR aleatórios (para novos vocabulários)

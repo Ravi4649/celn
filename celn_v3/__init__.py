@@ -89,9 +89,6 @@ from .intent_distiller import IntentDistiller, IntentPacket
 # ── HDC type vectors ───────────────────────────────────────────
 from .hdc_types import train_hdc_type_vectors, learn_type_field, analyze_type_clusters
 
-# ── NL → FOL parser ────────────────────────────────────────────
-from .nl_parser import VSAParser, ParsedPremise, parse_and_encode
-
 # ── Text generation ────────────────────────────────────────────
 from .generate import (
     ContextWindow,

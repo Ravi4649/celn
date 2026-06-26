@@ -6,15 +6,13 @@ CELN v3 — Mouth (Orquestrador com verificação de loop fechado) [LEGACY]
     MouthV2 usa reconstrução atencional com 3 scores competitivos
     (syn, sem, fidelity) via GHRR, que substitui o beam search
     do Mouth v1. O v1 é mantido apenas para referência.
-"""
-Pipeline completo de geração com verificação anti-alucinação:
+
+Pipeline do v1:
   1. Decomposer → (role, ant, cons) do vetor composto
   2. Lexicalizer → beam search → múltiplas word_sequences
   3. Linearizer → string final para cada beam
-  4. nl_parser → parseia a frase DE VOLTA a vetor
-  5. similarity(original, parsed) → score de fidelidade
-  6. Aceita a primeira frase com score > limiar auto-calibrável
-  7. Se nenhuma passa, retorna a melhor com flag low_confidence
+  4. similarity(original, parsed) → score de fidelidade
+  5. Aceita a primeira frase com score > limiar auto-calibrável
 
 Sem templates, sem thresholds fixos, sem backprop.
 Tudo auto-calibrável via percentis da distribuição real.
@@ -28,7 +26,6 @@ from .core import D, normalize, similarity
 from .decomposer import Decomposer
 from .lexicalizer import Lexicalizer, Beam
 from .linearizer import linearize
-from .nl_parser import VSAParser, parse_and_encode
 from .logic_encoder import LogicRoles
 from .pair_graph import PairGraph
 
@@ -64,7 +61,6 @@ class Mouth:
         w2i, i2w: Mapeamentos palavra↔índice
         pair_graph: PairGraph para transições (opcional)
         roles: LogicRoles para decode_rule (opcional)
-        spacy_model: Modelo spaCy para parser (ex: pt_core_news_lg)
     """
 
     def __init__(
@@ -74,7 +70,6 @@ class Mouth:
         i2w: Dict[int, str],
         pair_graph: Optional[PairGraph] = None,
         roles: Optional[LogicRoles] = None,
-        spacy_model: str = 'pt_core_news_lg',
     ):
         self.codebook = codebook.astype(np.float32)
         self.w2i = w2i
@@ -89,26 +84,12 @@ class Mouth:
             codebook, w2i, i2w, pair_graph=pair_graph, roles=self.roles,
         )
 
-        # VSAParser (lazy init)
-        self._parser: Optional[VSAParser] = None
-        self._spacy_model = spacy_model
-
     # ------------------------------------------------------------------
-    # Lazy init do parser
+    # Parser (removed — use MouthV2 for attention-based generation)
     # ------------------------------------------------------------------
 
-    def _get_parser(self) -> Optional[VSAParser]:
-        if self._parser is None:
-            try:
-                self._parser = VSAParser(
-                    self.codebook, self.w2i, self.i2w,
-                    spacy_model=self._spacy_model,
-                    seed=42,
-                )
-            except Exception as e:
-                print(f"[Mouth] Parser não disponível: {e}")
-                self._parser = None
-        return self._parser
+    def _get_parser(self):
+        return None
 
     # ------------------------------------------------------------------
     # Geração principal
