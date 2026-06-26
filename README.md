@@ -72,13 +72,13 @@ The pre-trained vector matrices (`.npz` files, ~1.5 GB total) are **not included
 
 | File | Size | Required | Download | Needed for |
 | :--- | :--- | :--- | :--- | :--- |
-| `data/celn_full_vectors.npz` | 709 MB | Yes | [Download](https://github.com/Ravi4649/celn/releases/download/v1.0/celn_full_vectors.npz) | All benchmarks (word vectors) |
-| `data/celn_type_field.npz` | 327 MB | Yes | [Download](https://github.com/Ravi4649/celn/releases/download/v1.0/celn_type_field.npz) | Syntactic structure features |
-| `data/spacy_300d_vectors.npz` | 439 MB | Yes | [Download](https://github.com/Ravi4649/celn/releases/download/v1.0/spacy_300d_vectors.npz) | Vocabulary bridge (300d → 10k) |
-| `data/sentence_centroids.npz` | 104 MB | Optional | [Download](https://github.com/Ravi4649/celn/releases/download/v1.0/sentence_centroids.npz) | SDM address initialization |
-| `data/pair_graph.npz` | 36 KB | Yes | [Download](https://github.com/Ravi4649/celn/releases/download/v1.0/pair_graph.npz) | Transition lookahead scoring |
+| `data/celn_full_vectors.npz` | 709 MB | Yes | [Download](https://huggingface.co/Ravi4643/celn-vectors/resolve/main/celn_full_vectors.npz) | All benchmarks (word vectors) |
+| `data/celn_type_field.npz` | 327 MB | Yes | [Download](https://huggingface.co/Ravi4643/celn-vectors/resolve/main/celn_type_field.npz) | Syntactic structure features |
+| `data/spacy_300d_vectors.npz` | 439 MB | Yes | [Download](https://huggingface.co/Ravi4643/celn-vectors/resolve/main/spacy_300d_vectors.npz) | Vocabulary bridge (300d → 10k) |
+| `data/sentence_centroids.npz` | 104 MB | Optional | [Download](https://huggingface.co/Ravi4643/celn-vectors/resolve/main/sentence_centroids.npz) | SDM address initialization |
+| `data/pair_graph.npz` | 36 KB | Yes | [Download](https://huggingface.co/Ravi4643/celn-vectors/resolve/main/pair_graph.npz) | Transition lookahead scoring |
 
-> **Note:** The demo (`step_by_step_en.py`) does **not** require any of these files. It uses deterministic hash-based vectors. URLs above are placeholders — replace with actual release links when available.
+> **Note:** The demo (`step_by_step_en.py`) does **not** require any of these files. It uses deterministic hash-based vectors.
 ---
 
 ## Architecture
