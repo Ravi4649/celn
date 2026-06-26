@@ -22,6 +22,7 @@ No downloads, no GPU, no model files. The demo encodes English rules ("Rex is a 
 
 ```bash
 python examples/step_by_step.py      # Portuguese version
+python examples/custom_rule.py       # Create your own rules
 python experiments/benchmark_proofwriter_real.py  # Full benchmark: 500 examples, ~5 minutes
 ```
 
@@ -67,6 +68,18 @@ The pre-trained vector matrices (`.npz` files, ~1.5 GB total) are **not included
 | `data/pair_graph.npz` | 36 KB | Yes | Transition lookahead scoring |
 
 > **Note:** The demo (`step_by_step_en.py`) does **not** require any of these files. It uses deterministic hash-based vectors.
+
+### Download
+
+Place the required `.npz` files into the `data/` directory:
+
+```bash
+# Example — replace URL with actual download link:
+# wget -P data/ https://github.com/Ravi4649/celn/releases/download/v1.0/celn_full_vectors.npz
+# wget -P data/ https://github.com/Ravi4649/celn/releases/download/v1.0/celn_type_field.npz
+```
+
+> ⚠️ Download links will be published alongside the first release. Until then, run `python celn/train.py` to generate vectors from a corpus, or use the hash-based demo which needs none of these files.
 
 ---
 
