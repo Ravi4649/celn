@@ -394,13 +394,13 @@ def test_forward_chainer():
     
     # Carrega vetores
     try:
-        data = np.load('celn_v3_full_vectors.npz', allow_pickle=True)
+        data = np.load('celn_full_vectors.npz', allow_pickle=True)
         vectors = data['vectors']
         vocab = [str(w) for w in data['vocab']]
         w2i = {w: i for i, w in enumerate(vocab)}
         i2w = {i: w for i, w in enumerate(vocab)}
     except FileNotFoundError:
-        print("✗ celn_v3_full_vectors.npz não encontrado")
+        print("✗ celn_full_vectors.npz não encontrado")
         return False
     
     chainer = ForwardChainer(vectors, w2i, i2w, n_sdm_locations=1024, seed=42)

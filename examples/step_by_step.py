@@ -16,10 +16,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
 np.set_printoptions(precision=4, suppress=True, threshold=8, linewidth=80)
 
-from celn_v3.core import D, normalize, similarity, bind, unbind
-from celn_v3.logic_encoder import LogicRoles, encode_rule, decode_consequent
-from celn_v3.memory import DenseSDM
-from celn_v3.forward_chainer import ForwardChainer
+from celn.core import D, normalize, similarity, bind, unbind
+from celn.logic_encoder import LogicRoles, encode_rule, decode_consequent
+from celn.memory import DenseSDM
+from celn.forward_chainer import ForwardChainer
 
 SEP = "─" * 72
 
@@ -67,11 +67,11 @@ def main():
     print("  ETAPA 1: Vetores de palavras")
     print(SEP)
 
-    npz_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "celn_v3_full_vectors.npz")
+    npz_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "celn_full_vectors.npz")
     use_random = not os.path.exists(npz_path)
 
     if use_random:
-        print("  [aviso] celn_v3_full_vectors.npz não encontrado.")
+        print("  [aviso] celn_full_vectors.npz não encontrado.")
         print("  Gerando 50 vetores aleatórios para demonstração.")
         print()
         rng = np.random.RandomState(42)
@@ -94,7 +94,7 @@ def main():
         i2w = {i: w for i, w in enumerate(words)}
         print(f"  Vocabulário: {vocab_size} palavras em {D} dimensões (aleatório)")
     else:
-        print("  [ok] celn_v3_full_vectors.npz encontrado.")
+        print("  [ok] celn_full_vectors.npz encontrado.")
         data = np.load(npz_path, allow_pickle=True)
         vectors = data["vectors"].astype(np.float32)
         vocab = [str(w) for w in data["vocab"]]
@@ -174,7 +174,7 @@ def main():
         show_vec(f"  papel {role_name}", role_vec)
 
         # Encode step by step (same as encode_rule() from logic_encoder)
-        from celn_v3.logic_encoder import get_perm_ant, get_perm_cons
+        from celn.logic_encoder import get_perm_ant, get_perm_cons
         pa = get_perm_ant()
         pc = get_perm_cons()
         show_vec("  PERM_ANT (tag de posição A)", pa)

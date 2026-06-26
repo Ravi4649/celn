@@ -28,9 +28,9 @@ import numpy as np
 from sklearn.decomposition import TruncatedSVD
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from celn_v3.train import build_cooccurrence, compute_ppmi
-from celn_v3.dual_channel import extract_type_vectors
-from celn_v3.core import normalize, projective_resonance as M, inverse_projective_resonance
+from celn.train import build_cooccurrence, compute_ppmi
+from celn.dual_channel import extract_type_vectors
+from celn.core import normalize, projective_resonance as M, inverse_projective_resonance
 
 
 def find_python_files(root='/home/ravizin', max_files=2000):

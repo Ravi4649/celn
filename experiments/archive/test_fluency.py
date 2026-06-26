@@ -17,13 +17,13 @@ from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.train import tokenize, build_cooccurrence, compute_ppmi
-from celn_v3.core import normalize, similarity, batch_normalize, make_random_vector
-from celn_v3.fluency import (
+from celn.train import tokenize, build_cooccurrence, compute_ppmi
+from celn.core import normalize, similarity, batch_normalize, make_random_vector
+from celn.fluency import (
     build_directional_bigrams,
     DirectionalGenerator,
 )
-from celn_v3.generate import ContextWindow, generate
+from celn.generate import ContextWindow, generate
 
 
 # Portuguese function words (for evaluation only, never for generation/scoring)
@@ -204,8 +204,8 @@ def phase3_compare(vectors, bigram_prob, w2i, i2w):
         try:
             # Old generator uses old vocab vectors from the .npz
             # We need to create a compatible setup
-            from celn_v3.generate import ContextWindow as CW
-            from celn_v3.core import normalize
+            from celn.generate import ContextWindow as CW
+            from celn.core import normalize
 
             # Build old PPMI from co-occurrence only within old vocab
             # For simplicity, we rebuild a PPMI limited to new vocab
@@ -217,7 +217,7 @@ def phase3_compare(vectors, bigram_prob, w2i, i2w):
 
             # Build a PPMI-like transition matrix from our bigram model
             # For fair comparison: use a symmetric PPMI from co-occurrence
-            from celn_v3.train import build_cooccurrence, compute_ppmi
+            from celn.train import build_cooccurrence, compute_ppmi
             # Just use the bigram_prob as ppmi for testing (both old and new
             # generators get the same transition info)
             old_ppmi = np.maximum(bigram_prob, bigram_prob.T)  # symmetrize

@@ -21,13 +21,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from celn_v3.core import D, normalize, similarity
-from celn_v3.mouth import Mouth, MouthResult
-from celn_v3.logic_encoder import LogicRoles, encode_rule
-from celn_v3.pair_graph import PairGraph
+from celn.core import D, normalize, similarity
+from celn.mouth import Mouth, MouthResult
+from celn.logic_encoder import LogicRoles, encode_rule
+from celn.pair_graph import PairGraph
 
 
-def load_vectors(path="celn_v3_full_vectors.npz"):
+def load_vectors(path="celn_full_vectors.npz"):
     data = np.load(path, allow_pickle=True)
     vectors = data['vectors'].astype(np.float32)
     vocab = [str(w) for w in data['vocab']]
@@ -188,7 +188,7 @@ def main():
         vectors, w2i, i2w = load_vectors()
         print(f"\n  Vetores: {len(vectors)} palavras × {vectors.shape[1]} dims")
     except FileNotFoundError:
-        print("\n  ✗ celn_v3_full_vectors.npz não encontrado")
+        print("\n  ✗ celn_full_vectors.npz não encontrado")
         return 1
 
     pair_graph = None

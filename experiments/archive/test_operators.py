@@ -14,12 +14,12 @@ from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.train import tokenize, build_cooccurrence, compute_ppmi, batch_normalize
-from celn_v3.core import normalize, similarity, projective_resonance
-from celn_v3.operators import (
+from celn.train import tokenize, build_cooccurrence, compute_ppmi, batch_normalize
+from celn.core import normalize, similarity, projective_resonance
+from celn.operators import (
     identify_operators, OperatorMemory, OperatorGenerator
 )
-from celn_v3.fluency import build_directional_bigrams, DirectionalGenerator
+from celn.fluency import build_directional_bigrams, DirectionalGenerator
 
 FUNCTION_WORDS = {
     'o','a','os','as','um','uma','uns','umas','de','do','da','dos','das',

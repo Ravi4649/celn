@@ -19,7 +19,7 @@ import sys, numpy as np, warnings
 warnings.filterwarnings('ignore')
 
 sys.path.insert(0, '/home/ravizin/celn-v3')
-from celn_v3.train import load_corpus, tokenize
+from celn.train import load_corpus, tokenize
 
 def cosine(a, b):
     a = a / (np.linalg.norm(a) + 1e-12)
@@ -33,7 +33,7 @@ print("=" * 70)
 print("RANDOM INDEXING — SIMILARITY CONCENTRATION TEST")
 print("=" * 70)
 
-data = np.load('/home/ravizin/celn-v3/celn_v3_full_vectors.npz', allow_pickle=True)
+data = np.load('/home/ravizin/celn-v3/celn_full_vectors.npz', allow_pickle=True)
 vectors = data['vectors'].astype(np.float32)
 vocab = data['vocab']
 w2i = {w: i for i, w in enumerate(vocab)}

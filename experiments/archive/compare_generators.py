@@ -16,18 +16,18 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.core import D, normalize, batch_normalize, similarity, spectral_entropy
-from celn_v3.encoder import Encoder, BaselineEncoder
-from celn_v3.decoder import Decoder, BaselineDecoder
-from celn_v3.generator import ProjectiveGenerator, BaselineGenerator
-from celn_v3.eval import run_comparison, print_report
-from celn_v3.train import load_corpus
+from celn.core import D, normalize, batch_normalize, similarity, spectral_entropy
+from celn.encoder import Encoder, BaselineEncoder
+from celn.decoder import Decoder, BaselineDecoder
+from celn.generator import ProjectiveGenerator, BaselineGenerator
+from celn.eval import run_comparison, print_report
+from celn.train import load_corpus
 
 
 def main():
     quick = '--quick' in sys.argv
     corpus_path = 'corpus_final.txt'
-    vectors_path = 'celn_v3_native_vectors.npz'
+    vectors_path = 'celn_native_vectors.npz'
 
     print("╔══════════════════════════════════════════════════════════╗")
     print("║  CELN v3 — Generator Comparison                         ║")
@@ -52,7 +52,7 @@ def main():
         print(f"  {len(w2i)} words, {vectors.shape[1]}D (native SVD)")
 
     # Also build PPMI from corpus for transition statistics
-    from celn_v3.train import build_cooccurrence, compute_ppmi
+    from celn.train import build_cooccurrence, compute_ppmi
     all_sentences = load_corpus(corpus_path)
     filtered = [[w for w in s if w in w2i] for s in all_sentences]
     filtered = [s for s in filtered if len(s) >= 3]
@@ -74,7 +74,7 @@ def main():
     # ── Non-Commutativity Check ──────────────────────────
     print()
     print("Non-commutativity of M(x,y):")
-    from celn_v3.core import projective_resonance
+    from celn.core import projective_resonance
     for wa, wb in [('cobre','metal'), ('onça','pintada'), ('rei','água')]:
         if wa in w2i and wb in w2i:
             va, vb = vectors[w2i[wa]], vectors[w2i[wb]]

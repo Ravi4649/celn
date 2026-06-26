@@ -14,8 +14,8 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.core import normalize, similarity
-from celn_v3.resonator import (
+from celn.core import normalize, similarity
+from celn.resonator import (
     ResonatorDecoder,
     bind_vec, unbind_vec,
     top_k_accuracy,
@@ -30,7 +30,7 @@ def load_codebook():
     """Load word vectors as the shared codebook."""
     vecs_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        'celn_v3_full_vectors.npz'
+        'celn_full_vectors.npz'
     )
     data = np.load(vecs_path)
     vectors = data['vectors']
@@ -262,7 +262,7 @@ def phase3_M_recovery(vectors, words, i2w, n_examples=100):
     print("PHASE 3: 2-Factor Recovery — M(a, b) via projective_resonance")
     print("=" * 72)
 
-    from celn_v3.core import projective_resonance
+    from celn.core import projective_resonance
 
     decoder = ResonatorDecoder(
         vectors, max_iter=20, n_restarts=3,

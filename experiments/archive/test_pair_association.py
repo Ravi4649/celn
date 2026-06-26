@@ -12,9 +12,9 @@ from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.train import tokenize, build_cooccurrence, compute_ppmi
-from celn_v3.core import normalize, similarity, batch_normalize
-from celn_v3.memory import DenseSDM, sentence_to_centroid
+from celn.train import tokenize, build_cooccurrence, compute_ppmi
+from celn.core import normalize, similarity, batch_normalize
+from celn.memory import DenseSDM, sentence_to_centroid
 
 # ===========================================================================
 # 1. Carregar corpus e treinar vetores

@@ -13,7 +13,7 @@ import json
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.dual_channel_structured import vsa_generate_structure
+from celn.dual_channel_structured import vsa_generate_structure
 import experiments.test_trigram_backoff as tri
 
 

@@ -20,9 +20,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from celn_v3.core import D, normalize
-from celn_v3.logic_encoder import LogicRoles, encode_rule, negate
-from celn_v3.decomposer import Decomposer
+from celn.core import D, normalize
+from celn.logic_encoder import LogicRoles, encode_rule, negate
+from celn.decomposer import Decomposer
 
 
 # =========================================================================
@@ -200,7 +200,7 @@ def test_decompose_deep():
         vocab.ensure(w)
     codebook = vocab.build_codebook()
 
-    from celn_v3.core import projective_resonance as M
+    from celn.core import projective_resonance as M
     roles = LogicRoles(seed=42)
     decomposer = Decomposer(codebook, vocab.w2i, vocab.i2w, roles=roles)
 
@@ -236,7 +236,7 @@ def main():
     # Tenta carregar vetores reais
     vectors, w2i, i2w = None, None, None
     try:
-        data = np.load('celn_v3_full_vectors.npz', allow_pickle=True)
+        data = np.load('celn_full_vectors.npz', allow_pickle=True)
         vocab_list = [str(w) for w in data['vocab']]
         vectors = data['vectors']
         w2i = {w: i for i, w in enumerate(vocab_list)}
@@ -244,7 +244,7 @@ def main():
         print(f"\n  Vetores reais carregados: {len(vocab_list)} palavras, "
               f"{vectors.shape[1]} dims")
     except FileNotFoundError:
-        print("\n  ⚠ celn_v3_full_vectors.npz não encontrado — "
+        print("\n  ⚠ celn_full_vectors.npz não encontrado — "
               "usando apenas hash-based")
 
     total_passed = 0

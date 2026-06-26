@@ -18,8 +18,8 @@ sys.path.insert(0, '/home/ravizin/celn-v3')
 
 import numpy as np
 from numpy.fft import fft, ifft
-from celn_v3.core import normalize, projective_resonance, similarity
-from celn_v3.train import tokenize
+from celn.core import normalize, projective_resonance, similarity
+from celn.train import tokenize
 import re
 import warnings
 warnings.filterwarnings('ignore')
@@ -28,7 +28,7 @@ warnings.filterwarnings('ignore')
 # LOAD
 # ═══════════════════════════════════════════════════════════════════════════════
 
-data = np.load('/home/ravizin/celn-v3/celn_v3_full_vectors.npz', allow_pickle=True)
+data = np.load('/home/ravizin/celn-v3/celn_full_vectors.npz', allow_pickle=True)
 vectors = data['vectors']  # (3007, 10000)
 vocab = data['vocab']
 w2i = {w: i for i, w in enumerate(vocab)}

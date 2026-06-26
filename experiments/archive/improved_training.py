@@ -13,8 +13,8 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.core import D, normalize, batch_normalize, similarity
-from celn_v3.train import load_corpus, tokenize, build_cooccurrence, compute_ppmi
+from celn.core import D, normalize, batch_normalize, similarity
+from celn.train import load_corpus, tokenize, build_cooccurrence, compute_ppmi
 
 
 def train_svd_vectors(sentences, dim=D, verbose=True):
@@ -113,7 +113,7 @@ def main():
             print(f"  {word:>12} → {', '.join(w for _, w in sims[:6])}")
 
     # Save vectors
-    outfile = f'celn_v3_vectors_{len(w2i)}.npz'
+    outfile = f'celn_vectors_{len(w2i)}.npz'
     np.savez(outfile, vectors=vectors, vocab=np.array(list(w2i.keys())))
     print(f"\nSaved vectors to {outfile}")
 

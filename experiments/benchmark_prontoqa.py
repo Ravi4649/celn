@@ -27,8 +27,8 @@ from dataclasses import dataclass
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from celn_v3.core import D, normalize, bind, unbind, similarity
-from celn_v3.logic_encoder import (
+from celn.core import D, normalize, bind, unbind, similarity
+from celn.logic_encoder import (
     LogicRoles, encode_rule, decode_rule, decode_antecedent, decode_consequent,
     get_perm_ant, get_perm_cons,
 )
@@ -233,7 +233,7 @@ class PrOntoDeducer:
         self.i2w = vocab.i2w
 
     def deduce(self, example: PrOntoExample) -> Tuple[str, float, List[str]]:
-        from celn_v3.forward_chainer import ForwardChainer
+        from celn.forward_chainer import ForwardChainer
 
         chainer = ForwardChainer(
             self.codebook, self.w2i, self.i2w,

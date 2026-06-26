@@ -14,14 +14,14 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from celn_v3.core import normalize, phase_lens, projective_resonance as M
-from celn_v3.dual_channel import DualChannelGenerator
-from celn_v3.memory import DenseSDM
-from celn_v3.resonator import unbind_M_reverse
+from celn.core import normalize, phase_lens, projective_resonance as M
+from celn.dual_channel import DualChannelGenerator
+from celn.memory import DenseSDM
+from celn.resonator import unbind_M_reverse
 
 
 def load_env():
-    vec_path = os.environ.get('CELN_VECTOR_PATH', 'celn_v3_full_vectors.npz')
+    vec_path = os.environ.get('CELN_VECTOR_PATH', 'celn_full_vectors.npz')
     data = np.load(vec_path)
     # file contains 'vocab' (list/array of words) and 'vectors' (matrix)
     words = [w.decode('utf-8') if isinstance(w, bytes) else w for w in data['vocab'].tolist()]
@@ -33,9 +33,9 @@ def load_env():
 
 def load_pair_sdm():
     # Use cached pair SDM if available
-    cache = os.path.join('celn_v3', '.cache', 'pair_sdm_7a76849d61c97885.npz')
+    cache = os.path.join('celn', '.cache', 'pair_sdm_7a76849d61c97885.npz')
     # Fallback to default path in repo .cache
-    cache2 = os.path.join('celn_v3', '.cache', 'pair_sdm_7a76849d61c97885.npz')
+    cache2 = os.path.join('celn', '.cache', 'pair_sdm_7a76849d61c97885.npz')
     # Attempt to open via DualChannelGenerator initialization later if needed
     return cache if os.path.exists(cache) else None
 

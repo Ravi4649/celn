@@ -6,10 +6,10 @@ Compares original vs expanded corpus generation quality.
 import sys, os, numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.train import load_corpus, build_cooccurrence, compute_ppmi
-from celn_v3.core import normalize, batch_normalize, projective_resonance as M
-from celn_v3.dual_channel import DualChannelGenerator
-from celn_v3.memory import DenseSDM
+from celn.train import load_corpus, build_cooccurrence, compute_ppmi
+from celn.core import normalize, batch_normalize, projective_resonance as M
+from celn.dual_channel import DualChannelGenerator
+from celn.memory import DenseSDM
 
 FUNCTION_WORDS = {
     'o','a','os','as','um','uma','uns','umas','de','do','da','dos','das',
@@ -36,7 +36,7 @@ print("COMPARISON: Original vs Expanded Corpus Generation")
 print("=" * 70)
 
 # ── Load expanded vectors ──
-data = np.load('/home/ravizin/celn-v3/celn_v3_expanded_svd_vectors.npz', allow_pickle=True)
+data = np.load('/home/ravizin/celn-v3/celn_expanded_svd_vectors.npz', allow_pickle=True)
 exp_vecs = data['vectors']
 exp_vocab = list(data['vocab'])
 exp_w2i = {w: i for i, w in enumerate(exp_vocab)}
@@ -44,7 +44,7 @@ exp_i2w = {i: w for i, w in enumerate(exp_vocab)}
 print(f"\nExpanded vectors: {len(exp_vocab)} words x {exp_vecs.shape[1]}D")
 
 # ── Load original vectors ──
-orig_data = np.load('/home/ravizin/celn-v3/celn_v3_full_vectors.npz', allow_pickle=True)
+orig_data = np.load('/home/ravizin/celn-v3/celn_full_vectors.npz', allow_pickle=True)
 orig_vecs = orig_data['vectors']
 orig_vocab = list(orig_data['vocab'])
 orig_w2i = {w: i for i, w in enumerate(orig_vocab)}

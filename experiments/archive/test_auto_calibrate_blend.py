@@ -12,9 +12,9 @@ import sys
 sys.path.insert(0, '/home/ravizin/celn-v3')
 
 import numpy as np
-from celn_v3.core import normalize, phase_lens, projective_resonance
-from celn_v3.dual_channel import DualChannelGenerator, extract_type_vectors
-from celn_v3.train import tokenize, load_corpus, build_cooccurrence, compute_ppmi
+from celn.core import normalize, phase_lens, projective_resonance
+from celn.dual_channel import DualChannelGenerator, extract_type_vectors
+from celn.train import tokenize, load_corpus, build_cooccurrence, compute_ppmi
 import re, warnings
 warnings.filterwarnings('ignore')
 
@@ -27,7 +27,7 @@ print("=" * 70)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 print("\n[1] Loading...")
-data = np.load('/home/ravizin/celn-v3/celn_v3_full_vectors.npz', allow_pickle=True)
+data = np.load('/home/ravizin/celn-v3/celn_full_vectors.npz', allow_pickle=True)
 sem_vecs = data['vectors']
 vocab = data['vocab']
 w2i = {w: i for i, w in enumerate(vocab)}

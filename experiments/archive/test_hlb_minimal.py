@@ -26,8 +26,8 @@ from typing import Tuple
 # Import the Projective Resonance implementation from the library.
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from celn_v3.core import projective_resonance, similarity
-from celn_v3.resonator import unbind_M_reverse
+from celn.core import projective_resonance, similarity
+from celn.resonator import unbind_M_reverse
 
 # ---------------------------------------------------------------------------
 # Fast Walsh‑Hadamard Transform (FWHT)

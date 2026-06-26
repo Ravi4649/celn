@@ -26,16 +26,16 @@ except Exception:
     has_cython = False
 
 from experiments.test_trigram_backoff import tokenize, load_corpus
-from celn_v3.core import encode_sequence
+from celn.core import encode_sequence
 
 
 def load_semantic_vectors(path=None):
-    # Load precomputed semantic vectors (default: celn_v3_full_vectors.npz)
+    # Load precomputed semantic vectors (default: celn_full_vectors.npz)
     if path is None:
         candidates = [
-            'celn_v3_full_vectors.npz',
-            'celn_v3_vectors_3007.npz',
-            'celn_v3_native_vectors.npz',
+            'celn_full_vectors.npz',
+            'celn_vectors_3007.npz',
+            'celn_native_vectors.npz',
         ]
         for c in candidates:
             if os.path.exists(c):
@@ -213,7 +213,7 @@ def main():
 
     # compute M-state per sentence using projective_resonance scan
     sentence_Ms = []
-    from celn_v3.core import projective_resonance
+    from celn.core import projective_resonance
     for vecs in sentence_word_vecs:
         if not vecs:
             sentence_Ms.append(np.zeros(sem_vectors.shape[1], dtype=np.float32))

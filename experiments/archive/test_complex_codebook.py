@@ -107,11 +107,11 @@ def baseline_real_space_gap(n=500, seed=1337):
     Related = add small gaussian noise to make near neighbor; unrelated = random other vector.
     """
     rng = np.random.RandomState(seed)
-    path = os.path.join(os.path.dirname(__file__), os.pardir, 'celn_v3_full_vectors.npz')
+    path = os.path.join(os.path.dirname(__file__), os.pardir, 'celn_full_vectors.npz')
     path = os.path.normpath(path)
     if not os.path.exists(path):
         # try absolute path used elsewhere
-        path = '/home/ravizin/celn-v3/celn_v3_full_vectors.npz'
+        path = '/home/ravizin/celn-v3/celn_full_vectors.npz'
     npz = np.load(path)
     # Try many possible keys
     if 'vectors' in npz:

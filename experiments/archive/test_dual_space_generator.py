@@ -9,9 +9,9 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from celn_v3.core import D, normalize, bind, encode_sequence
-from celn_v3.dual_space_generator import DualSpaceGenerator
-from celn_v3.pair_graph import PairGraph
+from celn.core import D, normalize, bind, encode_sequence
+from celn.dual_space_generator import DualSpaceGenerator
+from celn.pair_graph import PairGraph
 
 ROOT = Path(__file__).parent.parent
 
@@ -38,7 +38,7 @@ def main():
 
     # 1. Load 10k vectors
     print("\n1. Loading 10k vectors...")
-    d10k = np.load(ROOT / "celn_v3_full_vectors.npz", allow_pickle=True)
+    d10k = np.load(ROOT / "celn_full_vectors.npz", allow_pickle=True)
     vectors_10k = d10k["vectors"].astype(np.float32)
     word2idx = d10k["word2idx"].item()
     vocab = d10k["vocab"]
@@ -53,7 +53,7 @@ def main():
 
     # 3. Load type field
     print("\n3. Loading Type Field...")
-    dtf = np.load(ROOT / "celn_v3_type_field.npz", allow_pickle=True)
+    dtf = np.load(ROOT / "celn_type_field.npz", allow_pickle=True)
     type_field = dtf["type_field"].astype(np.float32)
     type_w2i = dtf["word2idx"].item()
     print(f"   {type_field.shape[0]} words, {type_field.shape[1]}d")

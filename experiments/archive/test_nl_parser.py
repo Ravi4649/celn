@@ -1,5 +1,5 @@
 """
-Test script for celn_v3.nl_parser
+Test script for celn.nl_parser
 Analyzes parsing accuracy for QMFOLBench patterns.
 """
 
@@ -7,18 +7,18 @@ import numpy as np
 import sys
 sys.path.insert(0, '/home/ravizin/celn-v3')
 
-from celn_v3.nl_parser import (
+from celn.nl_parser import (
     parse_premise, parse_and_encode, tokenize,
     extract_quantifier, extract_antecedent_consequent,
     ParsedPremise,
 )
-from celn_v3.logic_encoder import LogicRoles, decode_rule
-from celn_v3.vocab_bridge import VocabBridge
+from celn.logic_encoder import LogicRoles, decode_rule
+from celn.vocab_bridge import VocabBridge
 
 
 def load_codebook():
     """Load CELN vectors for decode verification."""
-    data = np.load('celn_v3_full_vectors.npz', allow_pickle=True)
+    data = np.load('celn_full_vectors.npz', allow_pickle=True)
     vectors = data['vectors']
     vocab = [str(w) for w in data['vocab']]
     w2i = {w: i for i, w in enumerate(vocab)}
@@ -179,7 +179,7 @@ def test_multiword_composition():
     bridge = VocabBridge()
     bridge.align_to_celn(vectors, w2i)
 
-    from celn_v3.nl_parser import _compose_term_vector
+    from celn.nl_parser import _compose_term_vector
 
     # Check composed vectors for multi-word terms
     test_terms = ["gato preto", "peixe tropical", "aluno estudante", "gato"]

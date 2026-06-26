@@ -9,10 +9,10 @@ import sys
 sys.path.insert(0, '/home/ravizin/celn-v3')
 
 import numpy as np
-from celn_v3.core import normalize, projective_resonance as M
-from celn_v3.dual_channel import DualChannelGenerator, extract_type_vectors
-from celn_v3.train import tokenize, load_corpus, build_cooccurrence, compute_ppmi
-from celn_v3.memory import DenseSDM
+from celn.core import normalize, projective_resonance as M
+from celn.dual_channel import DualChannelGenerator, extract_type_vectors
+from celn.train import tokenize, load_corpus, build_cooccurrence, compute_ppmi
+from celn.memory import DenseSDM
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -33,7 +33,7 @@ print("=" * 70)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 print("\n[1] Loading...")
-data = np.load('/home/ravizin/celn-v3/celn_v3_full_vectors.npz', allow_pickle=True)
+data = np.load('/home/ravizin/celn-v3/celn_full_vectors.npz', allow_pickle=True)
 sem_vecs = data['vectors']
 vocab = data['vocab']
 w2i = {w: i for i, w in enumerate(vocab)}
@@ -61,7 +61,7 @@ print("\n[3] Encoding word pairs for PairSDM...")
 import os, hashlib
 cache_dir = '/home/ravizin/celn-v3/.cache'
 os.makedirs(cache_dir, exist_ok=True)
-vector_path = '/home/ravizin/celn-v3/celn_v3_full_vectors.npz'
+vector_path = '/home/ravizin/celn-v3/celn_full_vectors.npz'
 vector_stat = os.stat(vector_path)
 vocab_hash = hashlib.sha1('\n'.join(map(str, vocab)).encode('utf-8')).hexdigest()
 cache_key = hashlib.sha1(

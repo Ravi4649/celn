@@ -2,8 +2,6 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20836283.svg)](https://doi.org/10.5281/zenodo.20836283)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)]()
-[![CPU-only](https://img.shields.io/badge/CPU-only-green.svg)]()
 
 **CELN** (*C. Elegans Learning Network*) is a deterministic reasoning engine built on Vector Symbolic Architectures (VSA). It achieves **100% accuracy on the ProofWriter benchmark** — including the "Unknown" class where Transformers fail — without backpropagation, without GPUs, and without hallucinations.
 
@@ -18,6 +16,7 @@ git clone https://github.com/Ravi4649/celn.git
 cd celn
 pip install -r requirements.txt
 python examples/step_by_step_en.py
+```
 
 No downloads, no GPU, no model files. The demo encodes English rules ("Rex is a dog", "every dog is a mammal") into 10k-dimensional vectors using deterministic hash-based word vectors, then walks through each deduction step.
 
@@ -92,8 +91,8 @@ corpus → train.py (PPMI + Hebbian) → word vectors (10k-D)
 
 | Module | Role |
 | :--- | :--- |
-| `core.py` | Projective Resonance M(x, y) · M(x, y), bind/unbind via FFT, Phase Lens |
-| `ghrr_core.py` | GHRR matrix binding and native Q · Kᵀ attention |
+| `core.py` | Projective Resonance M(x,y), bind/unbind via FFT, Phase Lens |
+| `ghrr_core.py` | GHRR matrix binding and native Q·K^T attention |
 | `train.py` | Word vector learning (PPMI + Hebbian / Random Projection) |
 | `logic_encoder.py` | FOL rule encoding via permutation-tagged superposition |
 | `memory.py` | Dense SDM with corroboration tracking and algebraic contradiction detection |

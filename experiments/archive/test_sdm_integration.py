@@ -19,14 +19,14 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.train import load_corpus, tokenize
-from celn_v3.core import normalize, similarity
-from celn_v3.memory import DenseSDM, sentence_to_centroid
-from celn_v3.eval import (
+from celn.train import load_corpus, tokenize
+from celn.core import normalize, similarity
+from celn.memory import DenseSDM, sentence_to_centroid
+from celn.eval import (
     topic_coherence, source_alignment, knowledge_alignment,
     bigram_diversity, repetition_rate, semantic_novelty,
 )
-from celn_v3.generator import ProjectiveGenerator
+from celn.generator import ProjectiveGenerator
 
 
 # ---------------------------------------------------------------------------
@@ -64,7 +64,7 @@ def phase1_setup():
     # Load word vectors
     vecs_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        'celn_v3_full_vectors.npz'
+        'celn_full_vectors.npz'
     )
     data = np.load(vecs_path)
     vectors = data['vectors']

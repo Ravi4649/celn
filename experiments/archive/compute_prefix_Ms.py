@@ -9,7 +9,7 @@ Outputs saved to experiments/no_prop_data.npz containing:
  - P_embed and P_M projection matrices (saved inside npz)
  - vocab list saved inside npz
 
-This script uses celn_v3.core.projective_resonance and celn_v3_full_vectors.npz
+This script uses celn.core.projective_resonance and celn_full_vectors.npz
 for token semantic vectors. Tokens not present in semantic vocab use zero vector.
 """
 
@@ -32,20 +32,20 @@ except Exception:
     load_corpus = tt.load_corpus
 
 try:
-    from celn_v3.core import projective_resonance
+    from celn.core import projective_resonance
 except Exception:
     # local import fallback
     import importlib.util
     spec_c = importlib.util.spec_from_file_location(
-        "celn_v3.core",
-        os.path.join(os.path.dirname(__file__), '..', 'celn_v3', 'core.py'),
+        "celn.core",
+        os.path.join(os.path.dirname(__file__), '..', 'celn', 'core.py'),
     )
     cmod = importlib.util.module_from_spec(spec_c)
     spec_c.loader.exec_module(cmod)
     projective_resonance = cmod.projective_resonance
 
 
-def load_semantic_vectors(path='celn_v3_full_vectors.npz'):
+def load_semantic_vectors(path='celn_full_vectors.npz'):
     if not os.path.exists(path):
         path = os.path.join(os.path.dirname(__file__), '..', path)
     z = np.load(path)

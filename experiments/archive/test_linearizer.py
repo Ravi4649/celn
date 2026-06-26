@@ -11,7 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from celn_v3.linearizer import linearize, analyze_word, inflect_quantifier
+from celn.linearizer import linearize, analyze_word, inflect_quantifier
 
 
 def test_inflect_quantifier():

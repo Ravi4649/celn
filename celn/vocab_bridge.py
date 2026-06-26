@@ -275,13 +275,13 @@ def test_vocab_bridge():
     # Alinha ao CELN
     print(f"\n3. Alinhando ao codebook CELN...")
     try:
-        data = np.load('celn_v3_full_vectors.npz', allow_pickle=True)
+        data = np.load('celn_full_vectors.npz', allow_pickle=True)
         celn_vectors = data['vectors']
         celn_vocab = [str(w) for w in data['vocab']]
         celn_w2i = {w: i for i, w in enumerate(celn_vocab)}
         bridge.align_to_celn(celn_vectors, celn_w2i)
     except FileNotFoundError:
-        print("   ✗ celn_v3_full_vectors.npz não encontrado")
+        print("   ✗ celn_full_vectors.npz não encontrado")
 
     print(f"\n4. Projeção (após alinhamento) + preservação similaridade:")
     bridge._load_spacy()
@@ -303,7 +303,7 @@ def test_vocab_bridge():
 
     print(f"\n5. Teste de augmentação de codebook:")
     try:
-        data = np.load('celn_v3_full_vectors.npz', allow_pickle=True)
+        data = np.load('celn_full_vectors.npz', allow_pickle=True)
         existing_vectors = data['vectors']
         vocab = [str(w) for w in data['vocab']]
         existing_w2i = {w: i for i, w in enumerate(vocab)}
@@ -317,7 +317,7 @@ def test_vocab_bridge():
         print(f"   Codebook expandido: {new_vectors.shape[0]} palavras")
         print(f"   Novas palavras adicionadas: {[w for w in new_words if w in new_w2i and w not in existing_w2i]}")
     except FileNotFoundError:
-        print("   ✗ celn_v3_full_vectors.npz não encontrado — skip")
+        print("   ✗ celn_full_vectors.npz não encontrado — skip")
 
     print(f"\n{'=' * 60}")
     print("RESULTADO: ✓ VocabBridge funcional")

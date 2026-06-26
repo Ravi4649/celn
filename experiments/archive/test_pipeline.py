@@ -38,15 +38,15 @@ from typing import Optional
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.train import tokenize, build_cooccurrence, compute_ppmi
-from celn_v3.core import (
+from celn.train import tokenize, build_cooccurrence, compute_ppmi
+from celn.core import (
     normalize, similarity, batch_normalize,
     projective_resonance, bind, unbind,
 )
-from celn_v3.dual_channel import DualChannelGenerator
-from celn_v3.hdc_types import train_hdc_type_vectors
-from celn_v3.memory import DenseSDM
-from celn_v3.resonator import ResonatorDecoder, bind_vec, unbind_vec, unbind_M_forward, unbind_M_reverse
+from celn.dual_channel import DualChannelGenerator
+from celn.hdc_types import train_hdc_type_vectors
+from celn.memory import DenseSDM
+from celn.resonator import ResonatorDecoder, bind_vec, unbind_vec, unbind_M_forward, unbind_M_reverse
 
 
 # Portuguese function words (for evaluation only)

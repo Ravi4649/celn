@@ -272,13 +272,13 @@ def test_logic_encoder():
     print(f"\n3. Ortogonalidade PERM_ANT vs PERM_CONS: {perm_sim:.4f}")
 
     try:
-        data = np.load('celn_v3_full_vectors.npz', allow_pickle=True)
+        data = np.load('celn_full_vectors.npz', allow_pickle=True)
         vocab = [str(w) for w in data['vocab']]
         vectors = data['vectors']
         w2i = {w: i for i, w in enumerate(vocab)}
         i2w = {i: w for i, w in enumerate(vocab)}
     except FileNotFoundError:
-        print("   ✗ celn_v3_full_vectors.npz não encontrado")
+        print("   ✗ celn_full_vectors.npz não encontrado")
         return False
 
     print("\n4. Teste de encode/decode (superposição + permutação):")

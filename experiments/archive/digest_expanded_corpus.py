@@ -14,9 +14,9 @@ Pipeline:
 import sys, os, time, numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.train import load_corpus, build_cooccurrence, compute_ppmi, train_vectors
-from celn_v3.core import normalize, batch_normalize, similarity, projective_resonance as M
-from celn_v3.memory import DenseSDM
+from celn.train import load_corpus, build_cooccurrence, compute_ppmi, train_vectors
+from celn.core import normalize, batch_normalize, similarity, projective_resonance as M
+from celn.memory import DenseSDM
 
 D = 10_000  # dimensionality
 
@@ -192,7 +192,7 @@ print(f"{'─'*70}")
 save_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Save word vectors
-npz_path = os.path.join(save_dir, 'celn_v3_expanded_vectors.npz')
+npz_path = os.path.join(save_dir, 'celn_expanded_vectors.npz')
 np.savez_compressed(npz_path, vectors=vectors, vocab=np.array(list(w2i.keys()), dtype=object))
 print(f"  Vectors saved: {npz_path} ({os.path.getsize(npz_path)/1024/1024:.0f} MB)")
 

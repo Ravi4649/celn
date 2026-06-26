@@ -26,11 +26,11 @@ import sys, os, re, time, numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.train import tokenize, build_cooccurrence, compute_ppmi
-from celn_v3.core import normalize, batch_normalize, projective_resonance as M
-from celn_v3.memory import DenseSDM
-from celn_v3.dual_channel import DualChannelGenerator
-from celn_v3.hdc_types import train_hdc_type_vectors
+from celn.train import tokenize, build_cooccurrence, compute_ppmi
+from celn.core import normalize, batch_normalize, projective_resonance as M
+from celn.memory import DenseSDM
+from celn.dual_channel import DualChannelGenerator
+from celn.hdc_types import train_hdc_type_vectors
 from sklearn.decomposition import TruncatedSVD
 
 

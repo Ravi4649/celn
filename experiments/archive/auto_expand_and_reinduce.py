@@ -41,7 +41,7 @@ try:
 except Exception:
     load_dataset = None
 
-from celn_v3.train import tokenize, load_corpus
+from celn.train import tokenize, load_corpus
 
 # Reuse some heuristics from clean_corpus if available
 try:
@@ -427,7 +427,7 @@ def main():
     # Now run PCFG induction on expanded corpus
     print('\n=== PCFG induction (expanded corpus) ===')
     try:
-        from celn_v3.pcfg_inducer import PCFGInducer
+        from celn.pcfg_inducer import PCFGInducer
         inducer = PCFGInducer(verbose=True)
         sentences_tok = load_corpus(str(out_path), min_len=2)
         print(f'Loaded {len(sentences_tok)} tokenized sentences for PCFG induction')
@@ -436,7 +436,7 @@ def main():
         inducer.save_pcfg(pcfg, str(pcfg_out))
         print(f'PCFG induced and saved to {pcfg_out}')
         # prune
-        from celn_v3.pcfg_pruner import prune_pcfg
+        from celn.pcfg_pruner import prune_pcfg
         pruned = prune_pcfg(pcfg, str(ROOT / 'pcfg_pruned_expanded.json'), verbose=True)
     except Exception as e:
         print(f'PCFG induction failed: {e}')

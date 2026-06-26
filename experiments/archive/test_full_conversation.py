@@ -20,10 +20,10 @@ import sys, os, re, time, hashlib
 import numpy as np
 sys.path.insert(0, '/home/ravizin/celn-v3')
 
-from celn_v3.core import normalize, projective_resonance as M, similarity, phase_lens
-from celn_v3.dual_channel import DualChannelGenerator, extract_type_vectors
-from celn_v3.train import tokenize, load_corpus, build_cooccurrence, compute_ppmi, precompute_spectra
-from celn_v3.memory import DenseSDM
+from celn.core import normalize, projective_resonance as M, similarity, phase_lens
+from celn.dual_channel import DualChannelGenerator, extract_type_vectors
+from celn.train import tokenize, load_corpus, build_cooccurrence, compute_ppmi, precompute_spectra
+from celn.memory import DenseSDM
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -49,7 +49,7 @@ print("╚" + "═" * 70 + "╝")
 print("\n[1] Loading pre-trained vectors...")
 vector_path = os.environ.get(
     'CELN_VECTOR_PATH',
-    '/home/ravizin/celn-v3/celn_v3_full_vectors.npz',
+    '/home/ravizin/celn-v3/celn_full_vectors.npz',
 )
 print(f"    Vector file: {vector_path}")
 data = np.load(vector_path, allow_pickle=True)
@@ -312,7 +312,7 @@ if all(w in w2i for w in ['cobra','comeu','rato']):
     composite = M(s_vec, inner, gamma=1.0, bilateral=True)
 
     # Unbind to find subject: unbind(composite, inner) ≈ cobra
-    from celn_v3.core import inverse_projective_resonance
+    from celn.core import inverse_projective_resonance
     s_recovered = inverse_projective_resonance(composite, inner, gamma=1.0, bilateral=True, n_iter=20)
     s_sims = sem_vecs @ s_recovered
     s_idx = int(np.argmax(s_sims))

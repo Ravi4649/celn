@@ -28,8 +28,8 @@ from dataclasses import dataclass
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from celn_v3.core import D, normalize, similarity
-from celn_v3.logic_encoder import LogicRoles, encode_rule, negate
+from celn.core import D, normalize, similarity
+from celn.logic_encoder import LogicRoles, encode_rule, negate
 
 
 # =========================================================================
@@ -253,7 +253,7 @@ class DeductionEngine:
         self.i2w = vocab.i2w
 
     def deduce(self, example: Example) -> Tuple[str, float, List[str]]:
-        from celn_v3.forward_chainer import ForwardChainer
+        from celn.forward_chainer import ForwardChainer
 
         chainer = ForwardChainer(
             self.codebook, self.w2i, self.i2w,

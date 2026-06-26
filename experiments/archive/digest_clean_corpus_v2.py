@@ -8,9 +8,9 @@ vector collapse from Hebbian over-training.
 import sys, os, time, numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.train import load_corpus, build_cooccurrence, compute_ppmi
-from celn_v3.core import normalize, batch_normalize, projective_resonance as M
-from celn_v3.memory import DenseSDM
+from celn.train import load_corpus, build_cooccurrence, compute_ppmi
+from celn.core import normalize, batch_normalize, projective_resonance as M
+from celn.memory import DenseSDM
 from sklearn.decomposition import TruncatedSVD
 
 t0 = time.time()
@@ -154,7 +154,7 @@ print(f"\n{'─'*70}")
 print("PHASE 6: Saving")
 print(f"{'─'*70}")
 save_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-npz_path = os.path.join(save_dir, 'celn_v3_limpo_svd_vectors.npz')
+npz_path = os.path.join(save_dir, 'celn_limpo_svd_vectors.npz')
 np.savez_compressed(npz_path, vectors=vectors, vocab=np.array(list(w2i.keys()), dtype=object))
 print(f"  Vectors saved: {npz_path} ({os.path.getsize(npz_path)/1024/1024:.0f} MB)")
 
@@ -183,7 +183,7 @@ for i in range(V):
     if counts[i] > 0:
         type_field[i] = normalize(accum[i] / counts[i])
 
-npz_type_path = os.path.join(save_dir, 'celn_v3_expanded_type_field.npz')
+npz_type_path = os.path.join(save_dir, 'celn_expanded_type_field.npz')
 np.savez_compressed(npz_type_path, type_field=type_field, type_vecs=type_vecs,
                     pair_src=np.array(pair_src, dtype=np.int32),
                     pair_fol=np.array(pair_fol, dtype=np.int32))

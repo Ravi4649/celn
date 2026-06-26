@@ -11,7 +11,7 @@ Test Dense SDM as long-term memory for CELN v3
   6. Contrast: SDM retrieval vs direct word-vector nearest neighbors
   7. Stability: add more sentences, verify old queries still work
 
-Uses the DenseSDM + sentence_to_centroid from celn_v3/memory.py.
+Uses the DenseSDM + sentence_to_centroid from celn/memory.py.
 """
 
 import sys
@@ -20,9 +20,9 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.train import load_corpus
-from celn_v3.core import normalize, similarity, auto_threshold
-from celn_v3.memory import DenseSDM, sentence_to_centroid
+from celn.train import load_corpus
+from celn.core import normalize, similarity, auto_threshold
+from celn.memory import DenseSDM, sentence_to_centroid
 
 
 # ---------------------------------------------------------------------------
@@ -107,7 +107,7 @@ def phase1_load():
     # Load word vectors
     vecs_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        'celn_v3_full_vectors.npz'
+        'celn_full_vectors.npz'
     )
     data = np.load(vecs_path)
     vectors = data['vectors']  # (vocab_size, D)

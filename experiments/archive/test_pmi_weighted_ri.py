@@ -11,7 +11,7 @@ import sys, numpy as np, warnings
 warnings.filterwarnings('ignore')
 
 sys.path.insert(0, '/home/ravizin/celn-v3')
-from celn_v3.train import load_corpus, build_cooccurrence, compute_ppmi, tokenize
+from celn.train import load_corpus, build_cooccurrence, compute_ppmi, tokenize
 
 def cosine(a, b):
     a = a / (np.linalg.norm(a) + 1e-12)
@@ -25,7 +25,7 @@ print("=" * 70)
 print("PMI-WEIGHTED RANDOM INDEXING — ANTI-COLLAPSE TEST")
 print("=" * 70)
 
-data = np.load('/home/ravizin/celn-v3/celn_v3_full_vectors.npz', allow_pickle=True)
+data = np.load('/home/ravizin/celn-v3/celn_full_vectors.npz', allow_pickle=True)
 vectors = data['vectors'].astype(np.float32)
 vocab = data['vocab']
 w2i = {w: i for i, w in enumerate(vocab)}
@@ -186,12 +186,12 @@ for (a, b), b4, af in zip(related, base_rel, ri_rel):
 for (a, b), b4, af in zip(unrelated, base_unr, ri_unr):
     print(f"  {a:<12s} ↔ {b:<12s}  {b4:.4f} → {af:.4f}  ({af-b4:+.4f})")
 
-out_path = '/home/ravizin/celn-v3/celn_v3_pmi_ri_vectors.npz'
+out_path = '/home/ravizin/celn-v3/celn_pmi_ri_vectors.npz'
 np.savez_compressed(
     out_path,
     vectors=ri_vectors.astype(np.float32),
     vocab=vocab,
-    source='celn_v3_full_vectors.npz',
+    source='celn_full_vectors.npz',
     method='pmi_weighted_random_indexing',
     n_passes=n_passes,
     learning_rate=lr,

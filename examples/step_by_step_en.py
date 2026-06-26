@@ -18,9 +18,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import numpy as np
 np.set_printoptions(precision=4, suppress=True, threshold=6, linewidth=80)
 
-from celn_v3.core import D, normalize, similarity, bind, unbind
-from celn_v3.logic_encoder import LogicRoles, encode_rule, decode_consequent
-from celn_v3.memory import DenseSDM
+from celn.core import D, normalize, similarity, bind, unbind
+from celn.logic_encoder import LogicRoles, encode_rule, decode_consequent
+from celn.memory import DenseSDM
 
 _SEP = "\n" + "─" * 72 + "\n"
 
@@ -110,7 +110,7 @@ def main():
 
         # Encode: bind(ROLE, normalize(PA⊛ant + PC⊛cons))
         # (same as logic_encoder.encode_rule)
-        from celn_v3.logic_encoder import get_perm_ant, get_perm_cons
+        from celn.logic_encoder import get_perm_ant, get_perm_cons
         inner = normalize(bind(get_perm_ant(), v_ant)
                         + bind(get_perm_cons(), v_cons))
         composite = bind(role_todos, inner)

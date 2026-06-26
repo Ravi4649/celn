@@ -18,14 +18,14 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from celn_v3.port_adapter import PortAdapter, load_word_vectors, sentence_state
-from celn_v3.train import load_corpus
+from celn.port_adapter import PortAdapter, load_word_vectors, sentence_state
+from celn.train import load_corpus
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Test non-metric PortAdapter readback")
     parser.add_argument("--corpus", default="corpus_final.txt")
-    parser.add_argument("--vectors", default="celn_v3_full_vectors.npz")
+    parser.add_argument("--vectors", default="celn_full_vectors.npz")
     parser.add_argument("--calib-sentences", type=int, default=256)
     parser.add_argument("--eval-sentences", type=int, default=64)
     parser.add_argument("--ports", type=int, default=32)

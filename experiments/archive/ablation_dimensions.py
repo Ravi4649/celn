@@ -25,9 +25,9 @@ import sys, json, time, re, hashlib, numpy as np
 from pathlib import Path
 sys.path.insert(0, {root!r})
 
-# 1. PATCH dimensionalidade ANTES de qualquer import celn_v3
-import celn_v3.core
-celn_v3.core.D = {dim}
+# 1. PATCH dimensionalidade ANTES de qualquer import celn
+import celn.core
+celn.core.D = {dim}
 
 # 2. Agora importa o benchmark (pega D já patched)
 from experiments.benchmark_proofwriter_real import run_benchmark

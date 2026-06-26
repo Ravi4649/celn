@@ -12,7 +12,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from celn_v3.ghrr_core import (
+from celn.ghrr_core import (
     D, M, EFFECTIVE_DIM,
     vec_10k_to_ghrr, ghrr_to_10k,
     normalize_slices, ghrr_bind,
@@ -20,8 +20,8 @@ from celn_v3.ghrr_core import (
     ghrr_attention, ghrr_attention_score,
     make_random_ghrr_vector,
 )
-from celn_v3.ghrr_generator import GHRRGenerator
-from celn_v3.pair_graph import PairGraph
+from celn.ghrr_generator import GHRRGenerator
+from celn.pair_graph import PairGraph
 
 ROOT = Path(__file__).parent.parent
 
@@ -77,7 +77,7 @@ def test_3_semantic_preservation():
     print("Test 3: Semantic Preservation After GHRR Conversion")
     print("=" * 60)
 
-    d10k = np.load(ROOT / "celn_v3_full_vectors.npz", allow_pickle=True)
+    d10k = np.load(ROOT / "celn_full_vectors.npz", allow_pickle=True)
     vecs = d10k["vectors"].astype(np.float32)
     w2i = d10k["word2idx"].item()
 
@@ -104,7 +104,7 @@ def test_4_bundling_state():
     print("Test 4: Bundling State Discrimination")
     print("=" * 60)
 
-    d10k = np.load(ROOT / "celn_v3_full_vectors.npz", allow_pickle=True)
+    d10k = np.load(ROOT / "celn_full_vectors.npz", allow_pickle=True)
     vecs = d10k["vectors"].astype(np.float32)
     w2i = d10k["word2idx"].item()
 
@@ -141,7 +141,7 @@ def test_5_generation():
     print("=" * 60)
 
     print("\nLoading data...")
-    d10k = np.load(ROOT / "celn_v3_full_vectors.npz", allow_pickle=True)
+    d10k = np.load(ROOT / "celn_full_vectors.npz", allow_pickle=True)
     vectors_10k = d10k["vectors"].astype(np.float32)
     word2idx = d10k["word2idx"].item()
 
@@ -149,7 +149,7 @@ def test_5_generation():
     spacy_words = d300["words"]
     spacy_vectors = d300["vectors"].astype(np.float32)
 
-    dtf = np.load(ROOT / "celn_v3_type_field.npz", allow_pickle=True)
+    dtf = np.load(ROOT / "celn_type_field.npz", allow_pickle=True)
     type_field = dtf["type_field"].astype(np.float32)
     type_w2i = dtf["word2idx"].item()
 

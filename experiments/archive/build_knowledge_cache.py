@@ -18,9 +18,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
 from collections import Counter
 
-from celn_v3.core import normalize
-from celn_v3.train import load_corpus, tokenize
-from celn_v3.port_adapter import load_word_vectors
+from celn.core import normalize
+from celn.train import load_corpus, tokenize
+from celn.port_adapter import load_word_vectors
 
 T = time.time
 
@@ -30,7 +30,7 @@ print("=" * 60)
 
 # 1. Load vectors
 t0 = T()
-vectors, w2i = load_word_vectors("celn_v3_full_vectors.npz")
+vectors, w2i = load_word_vectors("celn_full_vectors.npz")
 V, D = vectors.shape
 print(f"[1] Vectors: {V} × {D}  ({T()-t0:.1f}s)")
 
@@ -96,7 +96,7 @@ print(f"    Sample IDF: {[(w, round(v_idf[w], 2)) for w in verif_words]}")
 
 # 7. Load test
 t0 = T()
-from celn_v3.knowledge_channel import KnowledgeChannel
+from celn.knowledge_channel import KnowledgeChannel
 kc = KnowledgeChannel(out_path)
 kv = kc.query_and_read(["fotossintese", "planta"], vectors, w2i)
 scores = kc.score_candidates(["fotossintese", "planta", "carro", "o"], kv, vectors, w2i)

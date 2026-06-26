@@ -17,10 +17,10 @@ import sys
 sys.path.insert(0, '/home/ravizin/celn-v3')
 
 import numpy as np
-from celn_v3.core import (
+from celn.core import (
     normalize, projective_resonance, similarity, D, phi_weights, phi
 )
-from celn_v3.train import tokenize
+from celn.train import tokenize
 import re
 import warnings
 warnings.filterwarnings('ignore')
@@ -31,7 +31,7 @@ warnings.filterwarnings('ignore')
 
 print("=" * 70)
 print("Loading pre-trained vectors...")
-data = np.load('/home/ravizin/celn-v3/celn_v3_full_vectors.npz', allow_pickle=True)
+data = np.load('/home/ravizin/celn-v3/celn_full_vectors.npz', allow_pickle=True)
 vectors = data['vectors']  # (3007, 10000)
 vocab = data['vocab']      # (3007,) strings
 w2i = {w: i for i, w in enumerate(vocab)}

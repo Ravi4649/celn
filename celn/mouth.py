@@ -2,7 +2,7 @@
 CELN v3 — Mouth (Orquestrador com verificação de loop fechado) [LEGACY]
 =======================================================================
 
-⚠️  DEPRECATED — Use `celn_v3.mouth_v2.MouthV2` instead.
+⚠️  DEPRECATED — Use `celn.mouth_v2.MouthV2` instead.
     MouthV2 usa reconstrução atencional com 3 scores competitivos
     (syn, sem, fidelity) via GHRR, que substitui o beam search
     do Mouth v1. O v1 é mantido apenas para referência.

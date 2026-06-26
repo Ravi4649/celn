@@ -29,12 +29,12 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.core import D, similarity, projective_resonance, spectral_entropy
-from celn_v3.train import load_corpus, train_vectors, precompute_spectra
-from celn_v3.generate import (
+from celn.core import D, similarity, projective_resonance, spectral_entropy
+from celn.train import load_corpus, train_vectors, precompute_spectra
+from celn.generate import (
     ContextWindow, generate, generate_baseline, generate_from_prefix,
 )
-from celn_v3.evaluate import run_experiment, print_report
+from celn.evaluate import run_experiment, print_report
 
 
 def main():
@@ -203,7 +203,7 @@ def main():
             m = projective_resonance(va, vb, gamma=gamma)
             row += f" {spectral_entropy(m):>8.4f}"
         # Plain bind
-        from celn_v3.core import bind
+        from celn.core import bind
         pb = bind(va, vb)
         row += f" {spectral_entropy(pb):>8.4f}"
         print(row)

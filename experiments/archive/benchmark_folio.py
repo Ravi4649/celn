@@ -16,10 +16,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from celn_v3.core import normalize, similarity, auto_threshold
-from celn_v3.logic_encoder import LogicRoles, decode_rule, encode_rule
-from celn_v3.forward_chainer import ForwardChainer
-from celn_v3.vocab_bridge import VocabBridge
+from celn.core import normalize, similarity, auto_threshold
+from celn.logic_encoder import LogicRoles, decode_rule, encode_rule
+from celn.forward_chainer import ForwardChainer
+from celn.vocab_bridge import VocabBridge
 
 import spacy
 
@@ -257,7 +257,7 @@ def load_folio(path):
 
 def run_folio_benchmark(entries, max_examples=10):
     """Executa benchmark nos primeiros N exemplos FOLIO."""
-    data = np.load('celn_v3_full_vectors.npz', allow_pickle=True)
+    data = np.load('celn_full_vectors.npz', allow_pickle=True)
     vectors = data['vectors']
     vocab = [str(w) for w in data['vocab']]
     w2i = {w: i for i, w in enumerate(vocab)}

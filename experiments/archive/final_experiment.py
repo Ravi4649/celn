@@ -14,16 +14,16 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from celn_v3.train import load_corpus, tokenize, precompute_spectra
-from celn_v3.generate import (
+from celn.train import load_corpus, tokenize, precompute_spectra
+from celn.generate import (
     ContextWindow, generate, generate_baseline, generate_from_prefix,
     context_window_scores,
 )
-from celn_v3.evaluate import run_experiment, print_report
+from celn.evaluate import run_experiment, print_report
 from experiments.improved_training import train_svd_vectors
 
 # Import core with variable dimensionality
-from celn_v3.core import (
+from celn.core import (
     normalize, batch_normalize,
     bind, unbind,
     projective_resonance,

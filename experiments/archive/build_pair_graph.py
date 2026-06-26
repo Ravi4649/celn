@@ -23,8 +23,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
 from collections import defaultdict, Counter
 
-from celn_v3.train import load_corpus, tokenize
-from celn_v3.port_adapter import load_word_vectors
+from celn.train import load_corpus, tokenize
+from celn.port_adapter import load_word_vectors
 
 T = time.time
 
@@ -39,7 +39,7 @@ print("=" * 60)
 
 # 1. Load vectors
 t0 = T()
-vectors, w2i = load_word_vectors("celn_v3_full_vectors.npz")
+vectors, w2i = load_word_vectors("celn_full_vectors.npz")
 V, D = vectors.shape
 print(f"[1] Vectors: {V} × {D}  ({T()-t0:.1f}s)")
 
@@ -101,8 +101,8 @@ print(f"[6] Verify: {len(verify['sources'])} sources, "
 
 # 7. Lookahead test
 t0 = T()
-from celn_v3.pair_graph import PairGraph
-from celn_v3.core import normalize
+from celn.pair_graph import PairGraph
+from celn.core import normalize
 pg = PairGraph("pair_graph.npz")
 # Test: fotossintese → should have followers
 photo_idx = w2i.get("fotossintese")

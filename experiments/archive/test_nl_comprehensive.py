@@ -6,13 +6,13 @@ import sys
 sys.path.insert(0, '/home/ravizin/celn-v3')
 
 import numpy as np
-from celn_v3.nl_parser import VSAParser, parse_and_encode, parse_premise, ParsedPremise
-from celn_v3.logic_encoder import LogicRoles, decode_rule
-from celn_v3.vocab_bridge import VocabBridge
+from celn.nl_parser import VSAParser, parse_and_encode, parse_premise, ParsedPremise
+from celn.logic_encoder import LogicRoles, decode_rule
+from celn.vocab_bridge import VocabBridge
 
 
 def load_codebook():
-    data = np.load('celn_v3_full_vectors.npz', allow_pickle=True)
+    data = np.load('celn_full_vectors.npz', allow_pickle=True)
     vectors = data['vectors']
     vocab = [str(w) for w in data['vocab']]
     w2i = {w: i for i, w in enumerate(vocab)}
@@ -151,7 +151,7 @@ def test_chain_reasoning():
     
     parser = VSAParser(vectors, w2i, i2w)
     
-    from celn_v3.forward_chainer import ForwardChainer
+    from celn.forward_chainer import ForwardChainer
     
     chainer = ForwardChainer(vectors, w2i, i2w, n_sdm_locations=1024, seed=42)
     
