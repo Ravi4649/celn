@@ -20,6 +20,17 @@ python examples/step_by_step_en.py
 
 No downloads, no GPU, no model files. The demo encodes English rules ("Rex is a dog", "every dog is a mammal") into 10k-dimensional vectors using deterministic hash-based word vectors, then walks through each deduction step.
 
+```python
+from celn.logic_encoder import LogicRoles, encode_rule
+from celn.core import D, normalize
+from hashlib import sha256
+
+# Define a custom rule: "Every cat is an animal."
+cat = normalize(...)                       # your word vector
+animal = normalize(...)
+rule = encode_rule(LogicRoles().TODOS, cat, animal)  # encoded rule
+```
+
 ```bash
 python examples/step_by_step.py      # Portuguese version
 python examples/custom_rule.py       # Create your own rules
@@ -59,28 +70,15 @@ Both benchmarks achieve 100% across all three classes (True, False, Unknown). Wh
 
 The pre-trained vector matrices (`.npz` files, ~1.5 GB total) are **not included** in the repository to keep the clone lightweight.
 
-| File | Size | Required | Needed for |
-| :--- | :--- | :--- | :--- |
-| `data/celn_full_vectors.npz` | 709 MB | Yes | All benchmarks (word vectors) |
-| `data/celn_type_field.npz` | 327 MB | Yes | Syntactic structure features |
-| `data/spacy_300d_vectors.npz` | 439 MB | Yes | Vocabulary bridge (300d → 10k) |
-| `data/sentence_centroids.npz` | 104 MB | Optional | SDM address initialization |
-| `data/pair_graph.npz` | 36 KB | Yes | Transition lookahead scoring |
+| File | Size | Required | Download | Needed for |
+| :--- | :--- | :--- | :--- | :--- |
+| `data/celn_full_vectors.npz` | 709 MB | Yes | [Download](https://github.com/Ravi4649/celn/releases/download/v1.0/celn_full_vectors.npz) | All benchmarks (word vectors) |
+| `data/celn_type_field.npz` | 327 MB | Yes | [Download](https://github.com/Ravi4649/celn/releases/download/v1.0/celn_type_field.npz) | Syntactic structure features |
+| `data/spacy_300d_vectors.npz` | 439 MB | Yes | [Download](https://github.com/Ravi4649/celn/releases/download/v1.0/spacy_300d_vectors.npz) | Vocabulary bridge (300d → 10k) |
+| `data/sentence_centroids.npz` | 104 MB | Optional | [Download](https://github.com/Ravi4649/celn/releases/download/v1.0/sentence_centroids.npz) | SDM address initialization |
+| `data/pair_graph.npz` | 36 KB | Yes | [Download](https://github.com/Ravi4649/celn/releases/download/v1.0/pair_graph.npz) | Transition lookahead scoring |
 
-> **Note:** The demo (`step_by_step_en.py`) does **not** require any of these files. It uses deterministic hash-based vectors.
-
-### Download
-
-Place the required `.npz` files into the `data/` directory:
-
-```bash
-# Example — replace URL with actual download link:
-# wget -P data/ https://github.com/Ravi4649/celn/releases/download/v1.0/celn_full_vectors.npz
-# wget -P data/ https://github.com/Ravi4649/celn/releases/download/v1.0/celn_type_field.npz
-```
-
-> ⚠️ Download links will be published alongside the first release. Until then, run `python celn/train.py` to generate vectors from a corpus, or use the hash-based demo which needs none of these files.
-
+> **Note:** The demo (`step_by_step_en.py`) does **not** require any of these files. It uses deterministic hash-based vectors. URLs above are placeholders — replace with actual release links when available.
 ---
 
 ## Architecture
