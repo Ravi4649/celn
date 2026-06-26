@@ -27,7 +27,7 @@ from celn.logic_encoder import LogicRoles, encode_rule
 from celn.pair_graph import PairGraph
 
 
-def load_vectors(path="celn_full_vectors.npz"):
+def load_vectors(path="data/celn_full_vectors.npz"):
     data = np.load(path, allow_pickle=True)
     vectors = data['vectors'].astype(np.float32)
     vocab = [str(w) for w in data['vocab']]
@@ -193,7 +193,7 @@ def main():
 
     pair_graph = None
     try:
-        pair_graph = PairGraph("pair_graph.npz")
+        pair_graph = PairGraph("data/pair_graph.npz")
         print(f"  PairGraph: {len(pair_graph.follower_map)} nós")
     except Exception as e:
         print(f"  ⚠ PairGraph: {e}")

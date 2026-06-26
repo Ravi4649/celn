@@ -38,7 +38,7 @@ def main():
 
     # 1. Load 10k vectors
     print("\n1. Loading 10k vectors...")
-    d10k = np.load(ROOT / "celn_full_vectors.npz", allow_pickle=True)
+    d10k = np.load(ROOT / "data/celn_full_vectors.npz", allow_pickle=True)
     vectors_10k = d10k["vectors"].astype(np.float32)
     word2idx = d10k["word2idx"].item()
     vocab = d10k["vocab"]
@@ -46,7 +46,7 @@ def main():
 
     # 2. Load spaCy 300d vectors
     print("\n2. Loading spaCy 300d vectors...")
-    d300 = np.load(ROOT / "spacy_300d_vectors.npz")
+    d300 = np.load(ROOT / "data/spacy_300d_vectors.npz")
     spacy_words = d300["words"]
     spacy_vectors = d300["vectors"].astype(np.float32)
     print(f"   {spacy_vectors.shape[0]} words, {spacy_vectors.shape[1]}d")
@@ -60,7 +60,7 @@ def main():
 
     # 4. Load PairGraph
     print("\n4. Loading PairGraph...")
-    pair_graph = PairGraph(ROOT / "pair_graph.npz")
+    pair_graph = PairGraph(ROOT / "data/pair_graph.npz")
     print(f"   {len(pair_graph.follower_map)} source words")
 
     # 5. Count common words

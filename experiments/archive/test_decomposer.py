@@ -236,7 +236,7 @@ def main():
     # Tenta carregar vetores reais
     vectors, w2i, i2w = None, None, None
     try:
-        data = np.load('celn_full_vectors.npz', allow_pickle=True)
+        data = np.load('data/celn_full_vectors.npz', allow_pickle=True)
         vocab_list = [str(w) for w in data['vocab']]
         vectors = data['vectors']
         w2i = {w: i for i, w in enumerate(vocab_list)}

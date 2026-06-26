@@ -64,7 +64,7 @@ def phase1_setup():
     # Load word vectors
     vecs_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        'celn_full_vectors.npz'
+        'data/celn_full_vectors.npz'
     )
     data = np.load(vecs_path)
     vectors = data['vectors']

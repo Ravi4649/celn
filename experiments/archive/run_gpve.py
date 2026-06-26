@@ -54,7 +54,7 @@ def _count_dominant(log, channel):
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate text with GPVE")
     parser.add_argument("--pcfg", default="pcfg_pruned.json")
-    parser.add_argument("--vectors", default="celn_full_vectors.npz")
+    parser.add_argument("--vectors", default="data/celn_full_vectors.npz")
     parser.add_argument("--corpus", default="corpus_final.txt")
     parser.add_argument("--adapter-sentences", type=int, default=256)
     parser.add_argument("--ports", type=int, default=32)

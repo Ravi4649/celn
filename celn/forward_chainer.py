@@ -394,7 +394,7 @@ def test_forward_chainer():
     
     # Carrega vetores
     try:
-        data = np.load('celn_full_vectors.npz', allow_pickle=True)
+        data = np.load('data/celn_full_vectors.npz', allow_pickle=True)
         vectors = data['vectors']
         vocab = [str(w) for w in data['vocab']]
         w2i = {w: i for i, w in enumerate(vocab)}

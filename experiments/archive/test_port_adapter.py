@@ -25,7 +25,7 @@ from celn.train import load_corpus
 def main() -> None:
     parser = argparse.ArgumentParser(description="Test non-metric PortAdapter readback")
     parser.add_argument("--corpus", default="corpus_final.txt")
-    parser.add_argument("--vectors", default="celn_full_vectors.npz")
+    parser.add_argument("--vectors", default="data/celn_full_vectors.npz")
     parser.add_argument("--calib-sentences", type=int, default=256)
     parser.add_argument("--eval-sentences", type=int, default=64)
     parser.add_argument("--ports", type=int, default=32)

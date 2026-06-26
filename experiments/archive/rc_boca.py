@@ -33,7 +33,7 @@ def load_semantic_vectors(path=None):
     # Load precomputed semantic vectors (default: celn_full_vectors.npz)
     if path is None:
         candidates = [
-            'celn_full_vectors.npz',
+            'data/celn_full_vectors.npz',
             'celn_vectors_3007.npz',
             'celn_native_vectors.npz',
         ]

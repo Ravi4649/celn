@@ -30,7 +30,7 @@ print("=" * 60)
 
 # 1. Load vectors
 t0 = T()
-vectors, w2i = load_word_vectors("celn_full_vectors.npz")
+vectors, w2i = load_word_vectors("data/celn_full_vectors.npz")
 V, D = vectors.shape
 print(f"[1] Vectors: {V} × {D}  ({T()-t0:.1f}s)")
 

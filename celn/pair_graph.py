@@ -39,7 +39,7 @@ class PairGraph:
     forward in time to evaluate global coherence.
     """
 
-    def __init__(self, cache_path: str | Path = "pair_graph.npz"):
+    def __init__(self, cache_path: str | Path = "data/pair_graph.npz"):
         data = np.load(cache_path, allow_pickle=True)
 
         # follower_map: word_idx → array of follower indices

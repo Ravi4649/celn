@@ -31,7 +31,7 @@ from .core import D, normalize
 
 _Bridge_INSTANCE = None
 
-SPACY_VECTORS_PATH = 'spacy_300d_vectors.npz'
+SPACY_VECTORS_PATH = 'data/spacy_300d_vectors.npz'
 
 PROJ_SEED = 42
 SPACY_DIM = 300
@@ -275,7 +275,7 @@ def test_vocab_bridge():
     # Alinha ao CELN
     print(f"\n3. Alinhando ao codebook CELN...")
     try:
-        data = np.load('celn_full_vectors.npz', allow_pickle=True)
+        data = np.load('data/celn_full_vectors.npz', allow_pickle=True)
         celn_vectors = data['vectors']
         celn_vocab = [str(w) for w in data['vocab']]
         celn_w2i = {w: i for i, w in enumerate(celn_vocab)}
@@ -303,7 +303,7 @@ def test_vocab_bridge():
 
     print(f"\n5. Teste de augmentação de codebook:")
     try:
-        data = np.load('celn_full_vectors.npz', allow_pickle=True)
+        data = np.load('data/celn_full_vectors.npz', allow_pickle=True)
         existing_vectors = data['vectors']
         vocab = [str(w) for w in data['vocab']]
         existing_w2i = {w: i for i, w in enumerate(vocab)}

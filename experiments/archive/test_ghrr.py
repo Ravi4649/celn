@@ -77,7 +77,7 @@ def test_3_semantic_preservation():
     print("Test 3: Semantic Preservation After GHRR Conversion")
     print("=" * 60)
 
-    d10k = np.load(ROOT / "celn_full_vectors.npz", allow_pickle=True)
+    d10k = np.load(ROOT / "data/celn_full_vectors.npz", allow_pickle=True)
     vecs = d10k["vectors"].astype(np.float32)
     w2i = d10k["word2idx"].item()
 
@@ -104,7 +104,7 @@ def test_4_bundling_state():
     print("Test 4: Bundling State Discrimination")
     print("=" * 60)
 
-    d10k = np.load(ROOT / "celn_full_vectors.npz", allow_pickle=True)
+    d10k = np.load(ROOT / "data/celn_full_vectors.npz", allow_pickle=True)
     vecs = d10k["vectors"].astype(np.float32)
     w2i = d10k["word2idx"].item()
 
@@ -141,11 +141,11 @@ def test_5_generation():
     print("=" * 60)
 
     print("\nLoading data...")
-    d10k = np.load(ROOT / "celn_full_vectors.npz", allow_pickle=True)
+    d10k = np.load(ROOT / "data/celn_full_vectors.npz", allow_pickle=True)
     vectors_10k = d10k["vectors"].astype(np.float32)
     word2idx = d10k["word2idx"].item()
 
-    d300 = np.load(ROOT / "spacy_300d_vectors.npz")
+    d300 = np.load(ROOT / "data/spacy_300d_vectors.npz")
     spacy_words = d300["words"]
     spacy_vectors = d300["vectors"].astype(np.float32)
 
@@ -153,7 +153,7 @@ def test_5_generation():
     type_field = dtf["type_field"].astype(np.float32)
     type_w2i = dtf["word2idx"].item()
 
-    pair_graph = PairGraph(ROOT / "pair_graph.npz")
+    pair_graph = PairGraph(ROOT / "data/pair_graph.npz")
 
     common = set(word2idx.keys()) & set(str(w) for w in spacy_words)
     print(f"  Vocab={len(word2idx)}, spaCy={spacy_vectors.shape[0]}, common={len(common)}")

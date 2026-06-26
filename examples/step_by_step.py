@@ -67,7 +67,7 @@ def main():
     print("  ETAPA 1: Vetores de palavras")
     print(SEP)
 
-    npz_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "celn_full_vectors.npz")
+    npz_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data/celn_full_vectors.npz")
     use_random = not os.path.exists(npz_path)
 
     if use_random:

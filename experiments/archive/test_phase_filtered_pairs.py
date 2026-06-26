@@ -21,7 +21,7 @@ from celn.resonator import unbind_M_reverse
 
 
 def load_env():
-    vec_path = os.environ.get('CELN_VECTOR_PATH', 'celn_full_vectors.npz')
+    vec_path = os.environ.get('CELN_VECTOR_PATH', 'data/celn_full_vectors.npz')
     data = np.load(vec_path)
     # file contains 'vocab' (list/array of words) and 'vectors' (matrix)
     words = [w.decode('utf-8') if isinstance(w, bytes) else w for w in data['vocab'].tolist()]

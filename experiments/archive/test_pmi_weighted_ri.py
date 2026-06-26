@@ -191,7 +191,7 @@ np.savez_compressed(
     out_path,
     vectors=ri_vectors.astype(np.float32),
     vocab=vocab,
-    source='celn_full_vectors.npz',
+    source='data/celn_full_vectors.npz',
     method='pmi_weighted_random_indexing',
     n_passes=n_passes,
     learning_rate=lr,

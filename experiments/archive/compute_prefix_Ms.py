@@ -45,7 +45,7 @@ except Exception:
     projective_resonance = cmod.projective_resonance
 
 
-def load_semantic_vectors(path='celn_full_vectors.npz'):
+def load_semantic_vectors(path='data/celn_full_vectors.npz'):
     if not os.path.exists(path):
         path = os.path.join(os.path.dirname(__file__), '..', path)
     z = np.load(path)

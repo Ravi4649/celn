@@ -83,7 +83,7 @@ class PortAdapter:
     def calibrate_from_corpus(
         cls,
         corpus_path: str | Path = "corpus_final.txt",
-        vectors_path: str | Path = "celn_full_vectors.npz",
+        vectors_path: str | Path = "data/celn_full_vectors.npz",
         n_ports: int = 64,
         sensor_width: int | None = None,
         max_sentences: int | None = None,

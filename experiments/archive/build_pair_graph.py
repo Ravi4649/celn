@@ -30,7 +30,7 @@ T = time.time
 
 # Parse args
 corpus_path = sys.argv[1] if len(sys.argv) > 1 else "corpus_final.txt"
-output_path = sys.argv[2] if len(sys.argv) > 2 else "pair_graph.npz"
+output_path = sys.argv[2] if len(sys.argv) > 2 else "data/pair_graph.npz"
 
 tag = os.path.splitext(os.path.basename(output_path))[0]
 print("=" * 60)
@@ -39,7 +39,7 @@ print("=" * 60)
 
 # 1. Load vectors
 t0 = T()
-vectors, w2i = load_word_vectors("celn_full_vectors.npz")
+vectors, w2i = load_word_vectors("data/celn_full_vectors.npz")
 V, D = vectors.shape
 print(f"[1] Vectors: {V} × {D}  ({T()-t0:.1f}s)")
 
@@ -103,7 +103,7 @@ print(f"[6] Verify: {len(verify['sources'])} sources, "
 t0 = T()
 from celn.pair_graph import PairGraph
 from celn.core import normalize
-pg = PairGraph("pair_graph.npz")
+pg = PairGraph("data/pair_graph.npz")
 # Test: fotossintese → should have followers
 photo_idx = w2i.get("fotossintese")
 print(f"[7] Load+lookahead test: {T()-t0:.3f}s")

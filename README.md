@@ -60,11 +60,11 @@ The pre-trained vector matrices (`.npz` files, ~1.5 GB total) are **not included
 
 | File | Size | Required | Needed for |
 | :--- | :--- | :--- | :--- |
-| `celn_full_vectors.npz` | 709 MB | Yes | All benchmarks (word vectors) |
-| `celn_type_field.npz` | 327 MB | Yes | Syntactic structure features |
-| `spacy_300d_vectors.npz` | 439 MB | Yes | Vocabulary bridge (300d → 10k) |
-| `sentence_centroids.npz` | 104 MB | Optional | SDM address initialization |
-| `pair_graph.npz` | 36 KB | Yes | Transition lookahead scoring |
+| `data/celn_full_vectors.npz` | 709 MB | Yes | All benchmarks (word vectors) |
+| `data/celn_type_field.npz` | 327 MB | Yes | Syntactic structure features |
+| `data/spacy_300d_vectors.npz` | 439 MB | Yes | Vocabulary bridge (300d → 10k) |
+| `data/sentence_centroids.npz` | 104 MB | Optional | SDM address initialization |
+| `data/pair_graph.npz` | 36 KB | Yes | Transition lookahead scoring |
 
 > **Note:** The demo (`step_by_step_en.py`) does **not** require any of these files. It uses deterministic hash-based vectors.
 

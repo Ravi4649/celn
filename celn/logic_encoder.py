@@ -272,7 +272,7 @@ def test_logic_encoder():
     print(f"\n3. Ortogonalidade PERM_ANT vs PERM_CONS: {perm_sim:.4f}")
 
     try:
-        data = np.load('celn_full_vectors.npz', allow_pickle=True)
+        data = np.load('data/celn_full_vectors.npz', allow_pickle=True)
         vocab = [str(w) for w in data['vocab']]
         vectors = data['vectors']
         w2i = {w: i for i, w in enumerate(vocab)}
